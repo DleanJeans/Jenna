@@ -162,7 +162,7 @@ def embed_region(data, region):
     flag_image = emutils.get_url(country_code)[0]
     
     wtotal_cases, _, wtotal_deaths = data[0][2:5]
-    name, total_cases, new_cases, total_deaths, new_deaths, recovered, active_cases, critical, cases_per_1m, deaths_per_1m = country_data[1:11]
+    name, total_cases, new_cases, total_deaths, new_deaths, recovered, _, active_cases, critical, cases_per_1m, deaths_per_1m = country_data[1:12]
 
     recovered_percent = percent(recovered, total_cases, brackets=True)
     active_percent = percent(active_cases, total_cases, brackets=True)
@@ -181,7 +181,7 @@ def embed_region(data, region):
     cases_percent = f'{flag} {cases_percent}' if cases_percent else ''
     deaths_pop_percent = f'{flag} {deaths_pop_percent}' if deaths_pop_percent else ''
 
-    total_cases, new_cases, total_deaths, new_deaths, recovered, active_cases, critical = map(comma, country_data[2:9])
+    total_cases, new_cases, total_deaths, new_deaths, recovered, _, active_cases, critical = map(comma, country_data[2:10])
     new_cases = plus(new_cases, hide_if_none=False)
     new_deaths = plus(new_deaths, hide_if_none=False)
     
