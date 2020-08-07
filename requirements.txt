@@ -1,8 +1,8 @@
-discord.py
-python-dotenv==0.11.0
-upsidedown
-beautifulsoup4
-pycountry
-googletrans
-emoji-country-flag
-requests-async
+discord.py==1.4.0
+googletrans==2.4.0
+emoji_country_flag==1.2.1
+requests_async==0.6.2
+pycountry==19.8.18
+upsidedown==0.4
+beautifulsoup4==4.9.1
+python-dotenv==0.14.0
