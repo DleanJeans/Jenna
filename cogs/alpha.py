@@ -5,6 +5,7 @@ import cogs
 import importlib
 import sys
 import traceback
+import colors
 
 from discord.ext import commands
 from typing import Optional
@@ -71,7 +72,8 @@ class Alpha(commands.Cog):
                     content = content[:2000-6] + '...'
                     if tick:
                         content += '```'
-                await context.send(content)
+                embed = colors.embed(description=content)
+                await context.send(embed=embed)
 
             if oneliner:
                 break
