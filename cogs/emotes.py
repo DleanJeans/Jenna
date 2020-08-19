@@ -54,28 +54,6 @@ class Emotes(commands.Cog):
 
     @commands.command(aliases=['big'])
     async def enlarge(self, context, emoji:conv.NitroEmoji):
-        emoji = await self.get_external_emoji(context, emoji) or emoji
-        url, single_url = utils.get_url(emoji)
-        name = emoji
-        ext = 'png'
-        if type(emoji) in [discord.Emoji, discord.PartialEmoji]:
-            file = await url.read()
-            name = emoji.name
-            if emoji.animated:
-                ext = 'gif'
-        else:
-            file = await utils.download(url, utils.READ)
-            if not file:
-                file = await utils.download(single_url, utils.READ)
-        
-        if file:
-            file = discord.File(io.BytesIO(file), filename=f'{name}.{ext}')
-            await context.send(file=file)
-        else:
-            await context.message.add_reaction('⁉️')
-        
-    @emote.command()
-    async def link(self, context, emoji:conv.NitroEmoji):
         await context.trigger_typing()
         emoji = await self.get_external_emoji(context, emoji) or emoji
         url, single_url = utils.get_url(emoji)
