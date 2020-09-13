@@ -23,7 +23,8 @@ COG_EMOTES = {
     'Snipe': '🕵',
     'Emotes': 'me',
     'Games': '🎲',
-    'Misc': '♾️',
+    'Nhoặn': 'joikhomg',
+    'Misc': '♾️'
 }
 
 COG_FROM_EMOTES = { v: k for k, v in COG_EMOTES.items() }

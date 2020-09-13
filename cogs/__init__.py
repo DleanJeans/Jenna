@@ -19,7 +19,8 @@ NAMES = [
     'emotes',
     'games',
 
-    'misc',
+    'nhoancounter',
+    'misc'
 ]
 
 LIST = ['cogs.' + cog for cog in NAMES]
