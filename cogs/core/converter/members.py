@@ -5,7 +5,7 @@ import discord
 
 DEFAULT_MATCHING = .4
 
-class FuzzyMember(commands.MemberConverter):
+class FuzzyMemberConverter(commands.MemberConverter):
     def __init__(self, *, matching=DEFAULT_MATCHING):
         self.matching = matching
     
@@ -18,7 +18,7 @@ class FuzzyMember(commands.MemberConverter):
                 return member
             raise
 
-FuzzyMember = typing.Union[discord.Member, FuzzyMember]
+FuzzyMember = typing.Union[discord.Member, FuzzyMemberConverter]
 
 ROLE_SCORE_WEIGHT = 0.025
 MATCH_RETURNS = 10
