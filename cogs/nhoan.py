@@ -59,15 +59,18 @@ class Nhoan(commands.Cog, name='Nhoặn'):
     async def on_message(self, msg):
         ctx = await self.bot.get_context(msg)
         if ctx.command: return
+        content = msg.content
+        content = content.replace(ctx.prefix, '', 1) if ctx.prefix and content.startswith(ctx.prefix) else content
 
         for nhoan in NHOAN_SYNONYMS:
-            if nhoan in msg.content.split():
-                possible_name = msg.content.split(nhoan)[0]
+            if nhoan in content.split():
+                possible_name = content.split(nhoan)[0]
                 try:
                     member = await conv.members.FuzzyMemberConverter(matching=.6).convert(ctx, possible_name)
+                    await self.bump_nhoan_count(ctx, member)
                 except:
-                    return
-                await self.bump_nhoan_count(ctx, member)
+                    pass
+                return
     
     @commands.command(aliases = ['nhoặn', 'nh', 'cringe', 'crimge'])
     async def nhoan(self, ctx, member: Optional[conv.FuzzyMember] = None):
@@ -78,13 +81,14 @@ class Nhoan(commands.Cog, name='Nhoặn'):
         else:
             await ctx.send('No last message found. I don\'t know who to add nhoặn to!')
             return
-        if member == ctx.message.author:
-            await ctx.send('You cannot call nhoặn on yourself!')
-            return
 
         await self.bump_nhoan_count(ctx, member)
 
     async def bump_nhoan_count(self, ctx, member):
+        if member == ctx.message.author:
+            await ctx.send('You cannot call nhoặn on yourself!')
+            return
+        
         m_id = member.id
         original_count = self.allnhoan.get(m_id, 0)
         self.sync_nhoan_count(member, ctx.guild, original_count + 1)
