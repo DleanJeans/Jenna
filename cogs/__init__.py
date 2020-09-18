@@ -19,7 +19,7 @@ NAMES = [
     'emotes',
     'games',
 
-    'nhoancounter',
+    'nhoan',
     'misc'
 ]
 
