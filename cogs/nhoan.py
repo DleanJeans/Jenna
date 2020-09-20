@@ -70,9 +70,9 @@ class Nhoan(commands.Cog, name='Nhoặn'):
 
         for nhoan in NHOAN_SYNONYMS:
             if nhoan in content.split():
-                possible_name = content.split(nhoan)[0]
+                possible_name = content.split(nhoan)[0].strip()
                 try:
-                    member = await conv.members.FuzzyMemberConverter(matching=.7).convert(ctx, possible_name)
+                    member = await conv.members.FuzzyMemberConverter().convert(ctx, possible_name)
                     await self.bump_nhoan_count(ctx, member)
                 except:
                     pass

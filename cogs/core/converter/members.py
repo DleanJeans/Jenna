@@ -3,7 +3,7 @@ import difflib
 import typing
 import discord
 
-DEFAULT_MATCHING = .4
+DEFAULT_MATCHING = .35
 
 class FuzzyMemberConverter(commands.MemberConverter):
     def __init__(self, *, matching=DEFAULT_MATCHING):
@@ -34,7 +34,6 @@ def find_member(context, input_name, matching=DEFAULT_MATCHING, contains_all_onl
     close_matches = difflib.get_close_matches(input_name, members_by_name, MATCH_RETURNS, matching)
     
     def score_member(member_name):
-
         similarity = match_ratio(input_name, member_name)
         similarity += match_ratio(input_name.lower(), member_name.lower()) / 2
         similarity /= 1.5
