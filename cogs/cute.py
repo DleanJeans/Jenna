@@ -65,7 +65,7 @@ MAD_EMOJIS = [
 ]
 
 LOVE_WORDS = ['luv', 'love', 'iu', 'thank', 'good', 'yeu', 'yêu', 'great', 'gr8', 'useful']
-HATE_WORDS = ['fuck', 'screw', 'hate', 'ghet', 'ngu', 'ritord', 'retard', 'bad', 'crap']
+HATE_WORDS = ['fuck', 'screw', 'hate', 'ghet', 'ngu', 'ritord', 'retard', 'bad', 'crap', 'stupid']
 
 PEEK_COOLDOWN = 10 * 60
 

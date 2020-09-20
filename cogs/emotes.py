@@ -140,8 +140,8 @@ class Emotes(commands.Cog):
         if context.command:
             return
         await self.cache_external_emojis(msg)
-        is_owner = await self.bot.is_owner(msg.author)
-        if env.TESTING and not is_owner:
+        
+        if env.LOCAL:
             return
         await self.reply_emojis(msg)
     
