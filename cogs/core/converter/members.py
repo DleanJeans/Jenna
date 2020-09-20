@@ -23,7 +23,7 @@ FuzzyMember = typing.Union[discord.Member, FuzzyMemberConverter]
 ROLE_SCORE_WEIGHT = 0.025
 MATCH_RETURNS = 10
 
-def find_member(context, input_name, matching=DEFAULT_MATCHING):
+def find_member(context, input_name, matching=DEFAULT_MATCHING, contains_all_only=True):
     members = context.guild.members
     members_by_name = {}
     for m in members:
@@ -34,6 +34,9 @@ def find_member(context, input_name, matching=DEFAULT_MATCHING):
     close_matches = difflib.get_close_matches(input_name, members_by_name, MATCH_RETURNS, matching)
     
     def score_member(member_name):
+        if contains_all_only and not contains_all_either_way(input_name, member_name):
+            return 0
+
         similarity = match_ratio(input_name, member_name)
         similarity += match_ratio(input_name.lower(), member_name.lower()) / 2
         similarity /= 1.5
@@ -54,6 +57,12 @@ def find_member(context, input_name, matching=DEFAULT_MATCHING):
         member = members_by_name[name]
     
     return member
+
+def contains_all_either_way(a, b):
+    return contains_all(a, b) and contains_all(b, a)
+
+def contains_all(a, b):
+    return all(char in b.lower() for char in a.lower())
 
 def match_ratio(a, b):
     return difflib.SequenceMatcher(None, a, b).ratio()
