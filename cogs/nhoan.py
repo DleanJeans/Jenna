@@ -35,18 +35,20 @@ class Nhoan(commands.Cog, name='Nhoặn'):
         self.allguildsnhoan = self.Persist.get(GUILD_NHOAN_SUM_COUNTER, {})
         
         self.Persist.set(NHOAN_COUNTER, self.allnhoan)
-        self.Persist.set(GUILD_NHOAN_SUM_COUNTER, self.allguildsnhoan)
 
     def sync_nhoan_count(self, member: discord.Member, guild: discord.Guild, value: int):
         old_value = self.allnhoan.get(member.id, 0)
         difference = value - old_value
         
         self.allnhoan[member.id] = value
-        self.allguildsnhoan[guild] = self.allguildsnhoan.get(guild, 0) + difference
+        self.allguildsnhoan[guild.id] = self.allguildsnhoan.get(guild.id, 0) + difference
+
+        self.Persist.set(GUILD_NHOAN_SUM_COUNTER, self.allguildsnhoan)
+        self.Persist.request_backup()
 
     def init_embed(self, guild: discord.Guild):
         embed = colors.embed(title=TITLE)
-        embed.set_footer(text = NHOANEMBED_FOOTER.format(self.allguildsnhoan.get(guild, 0)))
+        embed.set_footer(text = NHOANEMBED_FOOTER.format(self.allguildsnhoan.get(guild.id, 0)))
         return embed
     
     def get_sorted_counts(self, guild: discord.Guild, count = 0):
@@ -141,6 +143,7 @@ class Nhoan(commands.Cog, name='Nhoặn'):
     async def topnhoan(self, ctx, count: Optional[int] = 5):
         msg = ''
         for i, (member, nhoantimes) in self.get_sorted_counts(ctx.guild, count):
+            if nhoantimes == 0: continue
             msg += TOPNHOAN_ENTRY.format(
                 i, member.mention, nhoantimes, 's' if nhoantimes != 1 else '')
         embed = self.init_embed(ctx.guild)

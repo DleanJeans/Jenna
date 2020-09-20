@@ -34,18 +34,18 @@ def find_member(context, input_name, matching=DEFAULT_MATCHING, contains_all_onl
     close_matches = difflib.get_close_matches(input_name, members_by_name, MATCH_RETURNS, matching)
     
     def score_member(member_name):
-        if contains_all_only and not contains_all_either_way(input_name, member_name):
-            return 0
 
         similarity = match_ratio(input_name, member_name)
         similarity += match_ratio(input_name.lower(), member_name.lower()) / 2
         similarity /= 1.5
 
+        contain_score = int(contains_all_either_way(input_name, member_name)) * 0.5
+
         member = members_by_name[member_name]
         role_score = score_member_role(context.guild, member)
         weighted_role_score = role_score * ROLE_SCORE_WEIGHT
         partial_match = int(input_name in member_name) * 0.5
-        total_score = similarity + weighted_role_score + partial_match
+        total_score = similarity + weighted_role_score + partial_match + contain_score
 
         return total_score
 
