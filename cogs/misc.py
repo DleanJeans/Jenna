@@ -31,7 +31,7 @@ class Misc(commands.Cog):
     @commands.command(hidden=True)
     async def do(self, context, subcommand, *, line=None):
         if subcommand not in ['math', 'meth']:
-            line = subcommand
+            line = subcommand + line
         await math.compute(context, line)
 
     @commands.command(aliases=['meth'])
