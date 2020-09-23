@@ -112,13 +112,13 @@ class Nhoan(commands.Cog, name='Nhoặn'):
     @commands.command()
     async def denhoan(self, ctx, member:Optional[conv.FuzzyMember], count=1):
         original_count = self.allnhoan.get(member.id, 0)
-        new_count = original_count - count
-        self.sync_nhoan_count(member, ctx.guild, max(0, new_count))
+        new_count = max(0, original_count - count)
+        self.sync_nhoan_count(member, ctx.guild, new_count)
         embed = self.init_embed(ctx.guild)
         embed.description = f'Nhoặn count for **{member.display_name}** changed to: {new_count}'
         await ctx.send(embed = embed)
 
-    @commands.command(aliases = ['hownh', 'nhoancount', 'cringecount', 'crimgecount'])
+    @commands.command(aliases = ['hownh'])
     async def hownhoan(self, ctx, member: Optional[conv.FuzzyMember] = None):
         member = member or ctx.author
         times = 0
@@ -140,7 +140,7 @@ class Nhoan(commands.Cog, name='Nhoặn'):
                 str(times), 's' if times != 1 else '', get_ordinal(rank))
         await ctx.send(embed = embed)
 
-    @commands.command(aliases = ['topnh', 'nhoankings', 'topcringe', 'topcrimge'])
+    @commands.command(aliases = ['topnh', 'chuanhoan'])
     async def topnhoan(self, ctx, count: Optional[int] = 5):
         msg = ''
         for i, (member, nhoantimes) in self.get_sorted_counts(ctx.guild, count):
