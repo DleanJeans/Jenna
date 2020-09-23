@@ -26,9 +26,9 @@ NHOAN_SYNONYMS = ['nhoan', 'nhoặn', 'cringe', 'crimge']
 class Nhoan(commands.Cog, name='Nhoặn'):
     def __init__(self, bot):
         self.bot = bot
+        bot.loop.create_task(self.setup_persist())
     
-    @commands.Cog.listener()
-    async def on_ready(self):
+    async def setup_persist(self):
         self.Persist = self.bot.get_cog(cogs.PERSIST)
         await self.Persist.wait_until_loaded()
         self.allnhoan = self.Persist.get(NHOAN_COUNTER, {})
@@ -64,7 +64,8 @@ class Nhoan(commands.Cog, name='Nhoặn'):
     @commands.Cog.listener()
     async def on_message(self, msg):
         ctx = await self.bot.get_context(msg)
-        if ctx.command: return
+        if ctx.command or not ctx.prefix: return
+
         content = msg.content
         content = content.replace(ctx.prefix, '', 1) if ctx.prefix and content.startswith(ctx.prefix) else content
 
