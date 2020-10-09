@@ -99,6 +99,19 @@ class Misc(commands.Cog):
     async def top(self, context, sub:Optional[reddit.subname]='random', posts:reddit.posts='1'):
         await context.trigger_typing()
         await reddit.send_posts_in_embeds(context, sub, 'top', posts)
+    
+    @commands.Cog.listener()
+    async def on_message(self, msg):
+        import re
+        from cogs.core import utils
+
+        REDDIT_TUBE_REGEX = '(https:\/\/reddit\.tube\/d\/\w+)'
+
+        reddit_tube_links = re.findall(REDDIT_TUBE_REGEX, msg.content)
+        for v in reddit_tube_links:
+            mp4 = await utils.download(v, method='')
+            url = str(mp4.url)
+            await msg.channel.send(url)
 
 def setup(bot):
     bot.add_cog(Misc(bot))
