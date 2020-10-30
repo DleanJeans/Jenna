@@ -110,7 +110,7 @@ class Snipe(commands.Cog):
             embed.set_image(url='')
         return files
     
-    @commands.command()
+    @commands.command(aliases=['unkolsh'])
     @commands.guild_only()
     async def snipelog(self, context, channel:discord.TextChannel=None):
         await self.send_log_in_embed(context, channel or context.channel, DELETED)
@@ -138,7 +138,9 @@ class Snipe(commands.Cog):
             extra = get_extra(m)
             time = get_time_display(m, state)
 
-            msg = f'`{time}` {m.content} {extra}'
+            snipe_index = min(len(logged_msgs), 10) - i
+            # msg = f'**{snipe_index}:** {msg}'
+            msg = f'**{snipe_index}:** `{time}` {m.content} {extra}'
             author_first_msg = not prev_msg or prev_msg.author != m.author
             if author_first_msg:
                 next_msg_same_author = i + 1 < len(logged_msgs) and logged_msgs[i+1].author == m.author
