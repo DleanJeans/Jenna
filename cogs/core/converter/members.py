@@ -20,31 +20,29 @@ class FuzzyMemberConverter(commands.MemberConverter):
 
 FuzzyMember = typing.Union[discord.Member, FuzzyMemberConverter]
 
-ROLE_SCORE_WEIGHT = 0.025
+ROLE_SCORE_WEIGHT = 0.05
 MATCH_RETURNS = 10
 
 def find_member(context, input_name, matching=DEFAULT_MATCHING, contains_all_only=True):
     members = context.guild.members
+    members = [m for m in members if contains_the_other(input_name, m.name) or contains_the_other(input_name, m.display_name)]
     members_by_name = {}
     for m in members:
         members_by_name[m.name] = m
-        members_by_name[m.display_name] = m
         members_by_name[m.name.lower()] = m
-        members_by_name[m.display_name.lower()] = m
+        if m.name != m.display_name:
+            members_by_name[m.display_name] = m
+            members_by_name[m.display_name.lower()] = m
     close_matches = difflib.get_close_matches(input_name, members_by_name, MATCH_RETURNS, matching)
     
     def score_member(member_name):
         similarity = match_ratio(input_name, member_name)
         similarity += match_ratio(input_name.lower(), member_name.lower()) / 2
-        similarity /= 1.5
-
-        contain_score = int(contains_all_either_way(input_name, member_name)) * 0.5
 
         member = members_by_name[member_name]
         role_score = score_member_role(context.guild, member)
         weighted_role_score = role_score * ROLE_SCORE_WEIGHT
-        partial_match = int(input_name in member_name) * 0.5
-        total_score = similarity + weighted_role_score + partial_match + contain_score
+        total_score = similarity + weighted_role_score
 
         return total_score
 
@@ -57,11 +55,13 @@ def find_member(context, input_name, matching=DEFAULT_MATCHING, contains_all_onl
     
     return member
 
-def contains_all_either_way(a, b):
-    return contains_all(a, b) and contains_all(b, a)
+def contains_the_other(a, b):
+    a = a.lower()
+    b = b.lower()
+    return contains_all(a, b) or contains_all(b, a)
 
 def contains_all(a, b):
-    return all(char in b.lower() for char in a.lower())
+    return all(char in b for char in a)
 
 def match_ratio(a, b):
     return difflib.SequenceMatcher(None, a, b).ratio()

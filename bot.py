@@ -1,5 +1,5 @@
-import os
 import discord
+import os
 import colors
 import env
 import logging
@@ -15,10 +15,13 @@ class Bot(commands.Bot):
         if env.TESTING: return
         await self.owner.send('I\'m ready to go!')
 
+intents = discord.Intents.default()
+intents.members = True
+
 prefixes = ['j ', 'jenna '] if not env.TESTING else ['k ']
 for p in prefixes[::]:
     prefixes.append(p.capitalize())
-bot = Bot(command_prefix=prefixes, case_insensitive=True)
+bot = Bot(command_prefix=prefixes, case_insensitive=True, intents=intents)
 
 if __name__ == '__main__':
     for cog in cogs.LIST:

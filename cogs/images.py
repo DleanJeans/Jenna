@@ -19,7 +19,7 @@ class Images(commands.Cog):
     @commands.guild_only()
     async def avatar(self, context, *, member:conv.FuzzyMember=None):
         member = member or context.author
-        embed = colors.embed()
+        embed = colors.embed(description=member.mention)
         embed.title = str(member)
         embed.set_image(url=str(member.avatar_url).replace('webp', 'png'))
         embed.timestamp = datetime.now().astimezone()
