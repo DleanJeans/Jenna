@@ -1,4 +1,4 @@
-discord.py==1.4.0
+discord.py==1.5.0
 googletrans==2.4.0
 emoji_country_flag==1.2.1
 requests_async==0.6.2
