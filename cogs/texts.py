@@ -58,7 +58,13 @@ class Texts(commands.Cog):
             last_message = await context.history(limit=1, before=context.message).flatten()
             text = last_message[0].clean_content or 'The last message has no text'
 
-        translated = self.translator.translate(text, dest=dest, src=src)
+        while True:
+            try:
+                translated = self.translator.translate(text, dest=dest, src=src)
+                break
+            except AttributeError as e:
+                self.translator = googletrans.Translator()
+
         embed = colors.embed()
         embed.set_author(name='Google Translate', url='https://translate.google.com/')
         embed.description = f'{translated.text}'.replace('nhoan', 'cringy')
