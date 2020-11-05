@@ -1,7 +1,9 @@
 from discord.ext import commands
 from .core.dank.unscramble import unscramble
-from .core.texts import randomword, palabrasaleatorias as pa
 from .cmds.texts import define
+from .cmds.texts import translate
+from .core.texts import palabrasaleatorias as pa
+from .core.texts import randomword
 from typing import Optional
 
 import discord
@@ -9,18 +11,6 @@ import upsidedown
 import colors
 import googletrans
 import const
-
-SUPPORTED_LANGS = { 'auto': 'Automatic', **googletrans.LANGUAGES, **googletrans.LANGCODES}
-
-def Src2Dest(s):
-    src2dest = s.split('>')
-    if len(src2dest) != 2:
-        raise commands.BadArgument('Not in lang>lang format!')
-    
-    src, dest = src2dest
-    src = src or 'auto'
-    dest = dest or 'en'
-    return '>'.join([src, dest])
 
 class Texts(commands.Cog):
     def __init__(self, bot):
@@ -45,30 +35,12 @@ class Texts(commands.Cog):
         await context.send(response)
     
     @commands.group(aliases=['tr', 'tl'], invoke_without_command=True)
-    async def translate(self, context, src2dest:Optional[Src2Dest]='auto>en', *, text=None):
+    async def translate(self, context, src2dest:Optional[translate.Src2Dest]='auto>en', *, text=None):
         await context.trigger_typing()
-        
-        src2dest = src2dest.split('>')
-        for lang in src2dest:
-            if lang and lang not in SUPPORTED_LANGS:
-                raise commands.BadArgument(f'`{lang}` is not a language code')
-        src, dest = src2dest
-        
         if not text:
             last_message = await context.history(limit=1, before=context.message).flatten()
-            text = last_message[0].clean_content or 'The last message has no text'
-
-        while True:
-            try:
-                translated = self.translator.translate(text, dest=dest, src=src)
-                break
-            except AttributeError as e:
-                self.translator = googletrans.Translator()
-
-        embed = colors.embed()
-        embed.set_author(name='Google Translate', url='https://translate.google.com/')
-        embed.description = f'{translated.text}'.replace('nhoan', 'cringy')
-        embed.set_footer(text=f'{translated.src}>{translated.dest}: {text}')
+            text = last_message[0].clean_content or translate.NO_TEXT
+        embed = translate.translate(src2dest, text)
         await context.send(embed=embed)
 
     @translate.command(name='langs', aliases=['lang'])
