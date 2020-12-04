@@ -1,5 +1,5 @@
 discord.py==1.5.1
-googletrans==3.0.0
+googletrans==3.1.0a0
 emoji_country_flag==1.2.1
 requests_async==0.6.2
 pycountry==19.8.18
