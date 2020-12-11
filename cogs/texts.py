@@ -6,11 +6,12 @@ from .core.texts import palabrasaleatorias as pa
 from .core.texts import randomword
 from typing import Optional
 
-import discord
-import upsidedown
 import colors
-import googletrans
 import const
+import discord
+import googletrans
+import re
+import upsidedown
 
 class Texts(commands.Cog):
     def __init__(self, bot):
@@ -87,6 +88,22 @@ class Texts(commands.Cog):
         languages = '\n'.join([f'`{code}` - {lang}' for code, lang in define.SUPPORTED_LANGS.items()])
         response = 'Google Dictionary supported languages:\n' + languages
         await context.send(response)
+    
+    @commands.command()
+    async def say(self, context, *, text):
+        from .emotes import EMOJI_PATTERN
+        Emotes = self.bot.get_cog('Emotes')
+
+        for plain_emoji in set(re.findall(EMOJI_PATTERN, text)):
+            name = plain_emoji.strip(':')
+            emoji_code = Emotes.get_known_emoji(name)
+            if not emoji_code:
+                emoji_code = await Emotes.get_external_emoji(context, name, add=True)
+                if not emoji_code: continue
+            text = text.replace(plain_emoji, str(emoji_code))
+        
+        await context.send(text)
+
 
 def setup(bot):
     bot.add_cog(Texts(bot))
