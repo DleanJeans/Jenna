@@ -105,8 +105,8 @@ class Nhoan(commands.Cog, name='Nhoặn'):
         if original_count == 0:
             embed.description = NHOANMSG_FIRSTTIME.format(name) + mention
         else:
-            embed.description = NHOANMSG_UPDATE.format(name, \
-                str(original_count + 1)) + mention
+            embed.description = NHOANMSG_UPDATE.format(mention, \
+                str(original_count + 1))
         await ctx.send(embed = embed)
 
     @commands.command()
