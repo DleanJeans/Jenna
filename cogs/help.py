@@ -202,7 +202,7 @@ class Help(commands.Cog):
                 await context.send_help(context.command)
             else:
                 await context.send(error)
-        elif type(error.original) is discord.errors.Forbidden:
+        elif hasattr(error, 'original') and type(error.original) is discord.errors.Forbidden:
             await context.author.send("I don't have the permissions to send it there!")
         else:
             original = error.original if hasattr(error, 'original') else error

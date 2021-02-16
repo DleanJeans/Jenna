@@ -6,3 +6,4 @@ pycountry==19.8.18
 upsidedown==0.4
 beautifulsoup4==4.9.1
 python-dotenv==0.14.0
+unidecode==1.2.0

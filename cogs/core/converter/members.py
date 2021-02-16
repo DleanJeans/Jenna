@@ -3,7 +3,7 @@ import difflib
 import typing
 import discord
 
-DEFAULT_MATCHING = .35
+DEFAULT_MATCHING = 0.1
 
 class FuzzyMemberConverter(commands.MemberConverter):
     def __init__(self, *, matching=DEFAULT_MATCHING):
@@ -22,27 +22,28 @@ FuzzyMember = typing.Union[discord.Member, FuzzyMemberConverter]
 
 ROLE_SCORE_WEIGHT = 0.05
 MATCH_RETURNS = 10
+WHOLE_WORD_POINTS = 0.25
 
 def find_member(context, input_name, matching=DEFAULT_MATCHING, contains_all_only=True):
+    input_name = input_name.lower()
     members = context.guild.members
-    members = [m for m in members if contains_the_other(input_name, m.name) or contains_the_other(input_name, m.display_name)]
+    members = [m for m in members if input_in_possible_names(m, input_name)]
+    
     members_by_name = {}
     for m in members:
-        members_by_name[m.name] = m
         members_by_name[m.name.lower()] = m
         if m.name != m.display_name:
-            members_by_name[m.display_name] = m
             members_by_name[m.display_name.lower()] = m
     close_matches = difflib.get_close_matches(input_name, members_by_name, MATCH_RETURNS, matching)
     
     def score_member(member_name):
         similarity = match_ratio(input_name, member_name)
-        similarity += match_ratio(input_name.lower(), member_name.lower()) / 2
+        include_score = WHOLE_WORD_POINTS if input_name in member_name or member_name in input_name else 0
 
         member = members_by_name[member_name]
         role_score = score_member_role(context.guild, member)
         weighted_role_score = role_score * ROLE_SCORE_WEIGHT
-        total_score = similarity + weighted_role_score
+        total_score = similarity + weighted_role_score + include_score
 
         return total_score
 
@@ -55,12 +56,19 @@ def find_member(context, input_name, matching=DEFAULT_MATCHING, contains_all_onl
     
     return member
 
-def contains_the_other(a, b):
-    a = a.lower()
-    b = b.lower()
-    return contains_all(a, b) or contains_all(b, a)
+from unidecode import unidecode
+def input_in_possible_names(member, input_name):
+    member_name = unidecode(member.name.lower())
+    display_name = unidecode(member.display_name.lower())
+    input_name = unidecode(input_name)
+    input_in_username = contains_the_other(member_name, input_name)
+    input_in_display_name = contains_the_other(display_name, input_name) if member_name != display_name else False
+    return input_in_username or input_in_display_name
 
-def contains_all(a, b):
+def contains_the_other(a, b):
+    return contains_all_chars(a, b) or contains_all_chars(b, a)
+
+def contains_all_chars(a, b):
     return all(char in b for char in a)
 
 def match_ratio(a, b):

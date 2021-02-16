@@ -38,7 +38,7 @@ class Misc(commands.Cog):
     async def math(self, context, *, line):
         await math.compute(context, line)
 
-    @commands.command(aliases=["who's"])
+    @commands.command(aliases=["who's", 'whois'])
     @commands.guild_only()
     async def whos(self, context, *, member:Optional[conv.FuzzyMember]=None):
         member = member or context.author
