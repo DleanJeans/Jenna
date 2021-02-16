@@ -219,11 +219,10 @@ class Help(commands.Cog):
             ])
             embed = colors.embed(description=msg.content) \
                 .add_field(name='Source', value=source)
-            content = f'```{exception}```'
-            if context.author == self.bot.owner:
-                await context.send(content, embed=embed)
-            else:
-                await self.bot.owner.send(content, embed=embed)
+            
+            error_text = error.original.text if hasattr(error, 'original') else error
+            await context.send(f'```{error_text}```')
+            await self.bot.owner.send(f'```{exception}```', embed=embed)
 
 ignored_errors = (commands.CommandNotFound,)
 
