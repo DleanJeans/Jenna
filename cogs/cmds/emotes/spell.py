@@ -43,12 +43,19 @@ async def reactspell(message, text):
         except:
             pass
 
+def convert_to_emotes_for_react(text):
+    return convert_to_emotes(text)
+
 async def spell(context, text):
     emotes = convert_to_emotes(text)
     response = ' '.join(emotes)
     await context.send(response)
 
-def convert_to_emotes(text):
+def convert_to_emotes_for_message(text):
+    text = replace_text_with_alternative_emojis(text)
+    return convert_to_emotes(text)
+
+def replace_text_with_alternative_emojis(text):
     text = text.upper()
     for a, emotes in ALTERNATIVES.items():
         if a not in text: continue
@@ -56,7 +63,10 @@ def convert_to_emotes(text):
         if is_letter and text.count(a) < 2: continue
         for e in emotes:
             text = replace_nth(text, a, e, 2 if is_letter else 1)
-    
+    return text
+
+def convert_to_emotes(text):
+    text = text.upper()
     emotes = []
     for c in text.upper():
         if c.isalpha():
