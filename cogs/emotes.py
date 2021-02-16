@@ -47,7 +47,13 @@ class Emotes(commands.Cog):
     async def reactspell(self, context, channel:Optional[discord.TextChannel], i:Optional[int]=1, *, text):
         message = await self.count_message(context, None, channel, i)
         await reactspell(message, text)
-        await context.message.add_reaction('✅')
+        await self.confirm_command(context)
+
+    async def confirm_command(self, context):
+        try:
+            await context.message.add_reaction('✅')
+        except discord.errors.NotFound as e:
+            pass
 
     @commands.group(aliases=['emoji'], hidden=True)
     async def emote(self, context): pass
@@ -123,7 +129,7 @@ class Emotes(commands.Cog):
         
         try:
             await message.add_reaction(emoji)
-            await context.message.add_reaction('✅')
+            await self.confirm_command(context)
         except:
             await context.message.add_reaction('⁉️')
         
