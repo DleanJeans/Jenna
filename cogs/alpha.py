@@ -29,7 +29,7 @@ class Alpha(commands.Cog):
         if x and owner_react and my_message:
             await reaction.message.delete()
 
-    @commands.command(aliases=['e', 'exec'])
+    @commands.command(aliases=['exec'])
     @commands.is_owner()
     async def eval(self, context, tick:Optional[is_tick]=False, *, code=None):
         import math, random
