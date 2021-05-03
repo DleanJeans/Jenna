@@ -50,11 +50,16 @@ class Snipe(commands.Cog):
         else:
             await context.send(embed=self.create_empty_embed(channel, EDITED))
     
-    @commands.command()
+    @commands.group(aliases=['unkolsh'])
     @commands.guild_only()
-    async def snipe(self, context, channel:typing.Optional[discord.TextChannel], i=1):
+    async def snipe(self, context, channel:typing.Optional[discord.TextChannel], i:typing.Union[int, str]=1):
+        if type(i) == str:
+            await self.send_log_in_embed(context, channel or context.channel, DELETED)
+            return
+        elif i > 10:
+            raise commands.BadArgument('You can only snipe the last 10 deleted messages!')
         await self.send_message_in_embed(context, channel, DELETED, i)
-    
+
     @commands.command(aliases=['editsnipe'])
     @commands.guild_only()
     async def snipedit(self, context, channel:typing.Optional[discord.TextChannel], i=1):
@@ -110,7 +115,7 @@ class Snipe(commands.Cog):
             embed.set_image(url='')
         return files
     
-    @commands.command(aliases=['unkolsh'])
+    @commands.command()
     @commands.guild_only()
     async def snipelog(self, context, channel:discord.TextChannel=None):
         await self.send_log_in_embed(context, channel or context.channel, DELETED)
