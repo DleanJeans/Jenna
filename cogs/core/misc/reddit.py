@@ -9,6 +9,7 @@ import re
 import colors
 import asyncio
 
+HTML_PARSER = 'html.parser'
 ICON_URL = 'https://www.redditstatic.com/icon.png'
 SUB_URL = 'https://www.reddit.com/r/{}/{}/'
 RSS = '.rss'
@@ -115,13 +116,13 @@ class RedditEntry:
         self.content_url]).replace('\n\n', '\n')
             
 def parse_entry(entry):
-    content = BeautifulSoup(entry.content.text, 'html.parser')
+    content = BeautifulSoup(entry.content.text, HTML_PARSER)
     sub = entry.category['label']
     title = entry.title.text
-    url = entry.link['href']
+    url = entry.link[HREF]
     thumbnail = content.img['src'] if content.img else ''
 
-    content_url = content.span.a['href'] or ''
+    content_url = content.span.a[HREF] or ''
     text = content.div
     text = text.text if text else ''
 
@@ -144,7 +145,7 @@ async def download_rss(subreddit, sorting, period):
     rss = await utils.download(url)
     errors = [not rss]
     try:
-        subname = BeautifulSoup(rss, 'html.parser').feed.category['label']
+        subname = BeautifulSoup(rss, HTML_PARSER).feed.category['label']
         invalid_subname = ' ' in subname
         errors += [invalid_subname]
     except:
@@ -154,9 +155,8 @@ async def download_rss(subreddit, sorting, period):
     return rss
 
 def get_entry_in_rss(rss, index=0, sorting=TOP):
-    soup = BeautifulSoup(rss, 'html.parser')
+    soup = BeautifulSoup(rss, HTML_PARSER)
     entries = soup('entry')
-    sub_name = soup.feed.category['label']
     
     try:
         entry = entries[index]
@@ -211,3 +211,28 @@ async def send_posts_in_embeds(context, sub, sorting, posts, period):
             embed.set_image(url=url).set_thumbnail(url='')
             await extra_msg.delete()
             await msg.edit(embed=embed)
+
+SAVE_VREDDIT_URL = 'https://savemp4.red/backend.php?url='
+REDDIT_POST_REGEX = '(https:\/\/(?:www\.)?reddit\.com\/r\/\w+\/comments\/\w+\/?)'
+HREF = 'href'
+DOWNLOAD_BUTTON = 'downloadButton'
+async def send_preview_for_link(msg):
+    reddit_post_links = re.findall(REDDIT_POST_REGEX, msg.content)
+    for link in reddit_post_links:
+        await msg.channel.trigger_typing()
+        rss = await utils.download(link + RSS)
+        rss_soup = BeautifulSoup(rss, HTML_PARSER)
+        content = rss_soup.find('content').text
+        content_soup = BeautifulSoup(content, HTML_PARSER)
+        media_link = content_soup.find('span').find('a')[HREF]
+        no_media_found = media_link[-1] == '/'
+        if no_media_found:
+            continue
+
+        if VREDDIT in media_link:
+            mp4_link = SAVE_VREDDIT_URL + link + '/'
+            mp4_page = await utils.download(mp4_link)
+            mp4_soup = BeautifulSoup(mp4_page, HTML_PARSER)
+            media_link = mp4_soup.find(class_=DOWNLOAD_BUTTON)[HREF]
+    
+        await msg.channel.send(media_link)

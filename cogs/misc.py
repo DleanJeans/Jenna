@@ -102,16 +102,7 @@ class Misc(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, msg):
-        import re
-        from cogs.core import utils
-
-        REDDIT_TUBE_REGEX = '(https:\/\/reddit\.tube\/d\/\w+)'
-
-        reddit_tube_links = re.findall(REDDIT_TUBE_REGEX, msg.content)
-        for v in reddit_tube_links:
-            mp4 = await utils.download(v, method='')
-            url = str(mp4.url)
-            await msg.channel.send(url)
+        await reddit.send_preview_for_link(msg)
 
 def setup(bot):
     bot.add_cog(Misc(bot))
