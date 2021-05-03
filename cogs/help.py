@@ -194,14 +194,14 @@ class Help(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, context, error):
         if isinstance(error, commands.UserInputError):
-            if type(error) in [commands.BadArgument, commands.BadUnionArgument]:
-                error.args = (error.args[0].replace('"', '`'),)
-                await context.send_help(context.command)
+            error.args = (error.args[0].replace('"', '`'),)
             if type(error) is commands.MissingRequiredArgument:
                 await context.send(f'Missing `{error.param.name}`!')
                 await context.send_help(context.command)
             else:
                 await context.send(error)
+            if type(error) in [commands.BadArgument, commands.BadUnionArgument]:
+                await context.send_help(context.command)
         elif hasattr(error, 'original') and type(error.original) is discord.errors.Forbidden:
             await context.author.send("I don't have the permissions to send it there!")
         else:
