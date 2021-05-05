@@ -8,6 +8,7 @@ import textwrap
 import re
 import colors
 import asyncio
+import json
 
 HTML_PARSER = 'html.parser'
 ICON_URL = 'https://www.redditstatic.com/icon.png'
@@ -213,26 +214,32 @@ async def send_posts_in_embeds(context, sub, sorting, posts, period):
             await msg.edit(embed=embed)
 
 SAVE_VREDDIT_URL = 'https://savemp4.red/backend.php?url='
-REDDIT_POST_REGEX = '(https:\/\/(?:www\.)?reddit\.com\/r\/\w+\/comments\/\w+\/?)'
+REDDIT_POST_REGEX = r'https://(?:www\.)?(?:reddit\.com/r/\w+/comments/|redd\.it/)(\w+)'
 HREF = 'href'
 DOWNLOAD_BUTTON = 'downloadButton'
-async def send_preview_for_link(msg):
-    reddit_post_links = re.findall(REDDIT_POST_REGEX, msg.content)
-    for link in reddit_post_links:
-        await msg.channel.trigger_typing()
-        rss = await utils.download(link + RSS)
-        rss_soup = BeautifulSoup(rss, HTML_PARSER)
-        content = rss_soup.find('content').text
-        content_soup = BeautifulSoup(content, HTML_PARSER)
-        media_link = content_soup.find('span').find('a')[HREF]
-        no_media_found = media_link[-1] == '/'
-        if no_media_found:
+JSON = '.json'
+MEDIA_URL = 'url_overridden_by_dest'
+REDDIT_COM = 'https://www.reddit.com/'
+async def send_preview_for_link(context):
+    msg = context.message
+    post_ids = re.findall(REDDIT_POST_REGEX, msg.content)
+    
+    for id in post_ids:
+        post_url = REDDIT_COM + id
+        json_link = post_url + JSON
+        json_data = await utils.download(json_link)
+        json_data = json.loads(json_data)
+        post_data = json_data[0]['data']['children'][0]['data']
+
+        if MEDIA_URL not in post_data:
             continue
 
+        media_link = post_data[MEDIA_URL]
         if VREDDIT in media_link:
-            mp4_link = SAVE_VREDDIT_URL + link + '/'
-            mp4_page = await utils.download(mp4_link)
-            mp4_soup = BeautifulSoup(mp4_page, HTML_PARSER)
-            media_link = mp4_soup.find(class_=DOWNLOAD_BUTTON)[HREF]
+            with context.typing():
+                mp4_link = SAVE_VREDDIT_URL + post_url + '/'
+                mp4_page = await utils.download(mp4_link)
+                mp4_soup = BeautifulSoup(mp4_page, HTML_PARSER)
+                media_link = mp4_soup.find(class_=DOWNLOAD_BUTTON)[HREF]
     
         await msg.channel.send(media_link)

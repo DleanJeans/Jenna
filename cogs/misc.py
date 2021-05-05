@@ -102,7 +102,8 @@ class Misc(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, msg):
-        await reddit.send_preview_for_link(msg)
+        context = await self.bot.get_context(msg)
+        await reddit.send_preview_for_link(context)
 
 def setup(bot):
     bot.add_cog(Misc(bot))
