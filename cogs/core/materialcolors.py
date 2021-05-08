@@ -20,3 +20,6 @@ def get_random(exceptions=None):
 
 def embed(*, color=None, **kwargs):
     return discord.Embed(color=color or get_random(), **kwargs)
+
+def embed_error(**kwargs):
+    return discord.Embed(color=discord.Color.red(), **kwargs)

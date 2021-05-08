@@ -200,8 +200,6 @@ class Help(commands.Cog):
                 await context.send_help(context.command)
             else:
                 await context.send(error)
-            if type(error) in [commands.BadArgument, commands.BadUnionArgument]:
-                await context.send_help(context.command)
         elif hasattr(error, 'original') and type(error.original) is discord.errors.Forbidden:
             await context.author.send("I don't have the permissions to send it there!")
         else:
@@ -217,12 +215,12 @@ class Help(commands.Cog):
                 f'in {msg.channel.mention} of `{msg.guild}`\n' if not isinstance(msg.channel, discord.DMChannel) else '',
                 f'[Jump]({msg.jump_url})'
             ])
-            embed = colors.embed(description=msg.content) \
-                .add_field(name='Source', value=source)
-            
-            error_text = error.original.text if hasattr(error, 'original') else error
-            await context.send(f'```{error_text}```')
-            await self.bot.owner.send(f'```{exception}```', embed=embed)
+            author_embed = colors.embed_error(description=msg.content).add_field(name='Source', value=source)
+            error_text = getattr(error.original, 'text') or error.original.args[0] if hasattr(error, 'original') else error
+            user_embed = colors.embed_error(title='Error', description=error_text)
+
+            await context.send(embed=user_embed)
+            await self.bot.owner.send(f'```{exception}```', embed=author_embed)
 
 ignored_errors = (commands.CommandNotFound,)
 
