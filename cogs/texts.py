@@ -1,7 +1,7 @@
 from discord.ext import commands
 from .core.dank.unscramble import unscramble
 from .cmds.texts import define
-from .cmds.texts import translate
+from .cmds.texts import translate as gtranslate
 from .core.texts import palabrasaleatorias as pa
 from .core.texts import randomword
 from typing import Optional
@@ -35,20 +35,23 @@ class Texts(commands.Cog):
             response += 'Not found!'
         await context.send(response)
     
-    @commands.group(aliases=['tr', 'tl'], invoke_without_command=True)
-    async def translate(self, context, src2dest:Optional[translate.Src2Dest]='auto>en', *, text=None):
+    @commands.command(aliases=['str'])
+    async def saytranslate(self, context, src2dest:Optional[gtranslate.Src2Dest]='auto>en', *, text=None):
         await context.trigger_typing()
-        if not text:
-            last_message = await context.history(limit=1, before=context.message).flatten()
-            text = last_message[0].clean_content or translate.NO_TEXT
-        embed = translate.translate(src2dest, text)
+        translated = await gtranslate.translate(context, src2dest, text)
+        await context.send(translated.text)
+    
+    @commands.group(aliases=['tr', 'tl'], invoke_without_command=True)
+    async def translate(self, context, src2dest:Optional[gtranslate.Src2Dest]='auto>en', *, text=None):
+        await context.trigger_typing()
+        embed = await gtranslate.embed_translate(context, src2dest, text)
         await context.send(embed=embed)
 
     @translate.command(name='langs', aliases=['lang'])
     async def translatelangs(self, context):
-        output = '**Supported Languages**:\n'
-        output += const.BULLET.join([f'`{code}`-{lang.title()}' for code, lang in googletrans.LANGUAGES.items()])
-        await context.send(output)
+        output = gtranslate.get_supported_languages()
+        await context.message.author.send(output)
+        await context.send('Supported Languages has been sent through DM!')
 
     @commands.command(aliases=['rdw'])
     async def randomword(self, context, lang='en'):
@@ -79,8 +82,6 @@ class Texts(commands.Cog):
         command.insert(2, 'full')
         command = ' '.join(command)
         embed = await define.define(lang, word, full)
-        if not full and not embed.footer:
-            embed.set_footer(text=define.FULL_FOOTER + command)
         await context.send(embed=embed)
     
     @define.command(name='langs', aliases=['lang'])
