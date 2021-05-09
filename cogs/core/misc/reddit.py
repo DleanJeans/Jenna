@@ -214,7 +214,7 @@ async def send_posts_in_embeds(context, sub, sorting, posts, period):
             await msg.edit(embed=embed)
 
 
-REDDIT_POST_REGEX = r'https://(?:www\.)?(?:reddit\.com/r/\w+/comments/|redd\.it/)(\w+)'
+REDDIT_POST_REGEX = r'https://(?:\w+\.)?(?:reddit\.com(?:/r/\w+/comments)?|redd\.it)/(\w+)'
 HREF = 'href'
 JSON = '.json'
 MEDIA_URL = 'url_overridden_by_dest'
