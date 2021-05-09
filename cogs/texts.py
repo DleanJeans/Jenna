@@ -39,7 +39,7 @@ class Texts(commands.Cog):
     async def saytranslate(self, context, src2dest:Optional[gtranslate.Src2Dest]='auto>en', *, text=None):
         await context.trigger_typing()
         translated = await gtranslate.translate(context, src2dest, text)
-        await context.send(translated.text)
+        await context.reply(translated.text, mention_author=False)
     
     @commands.group(aliases=['tr', 'tl'], invoke_without_command=True)
     async def translate(self, context, src2dest:Optional[gtranslate.Src2Dest]='auto>en', *, text=None):
