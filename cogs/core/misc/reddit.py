@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from discord.ext import commands
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urljoin, urlencode
 from .. import utils
 
 import discord
@@ -213,10 +213,9 @@ async def send_posts_in_embeds(context, sub, sorting, posts, period):
             await extra_msg.delete()
             await msg.edit(embed=embed)
 
-SAVE_VREDDIT_URL = 'https://savemp4.red/backend.php?url='
+
 REDDIT_POST_REGEX = r'https://(?:www\.)?(?:reddit\.com/r/\w+/comments/|redd\.it/)(\w+)'
 HREF = 'href'
-DOWNLOAD_BUTTON = 'downloadButton'
 JSON = '.json'
 MEDIA_URL = 'url_overridden_by_dest'
 REDDIT_COM = 'https://www.reddit.com/'
@@ -225,21 +224,48 @@ async def send_preview_for_link(context):
     post_ids = re.findall(REDDIT_POST_REGEX, msg.content)
     
     for id in post_ids:
-        post_url = REDDIT_COM + id
+        post_url = urljoin(REDDIT_COM, id)
         json_link = post_url + JSON
         json_data = await utils.download(json_link)
         json_data = json.loads(json_data)
         post_data = json_data[0]['data']['children'][0]['data']
+        post_url = urljoin(REDDIT_COM, post_data['permalink'])
 
         if MEDIA_URL not in post_data:
             continue
 
-        media_link = post_data[MEDIA_URL]
-        if VREDDIT in media_link:
-            with context.typing():
-                mp4_link = SAVE_VREDDIT_URL + post_url + '/'
-                mp4_page = await utils.download(mp4_link)
-                mp4_soup = BeautifulSoup(mp4_page, HTML_PARSER)
-                media_link = mp4_soup.find(class_=DOWNLOAD_BUTTON)[HREF]
-    
-        await msg.channel.send(media_link)
+        with context.typing():
+            media_link = post_data[MEDIA_URL]
+            if VREDDIT in media_link:
+                media_link = await reddit_tube(post_url)
+                if not media_link:
+                    media_link = await savemp4_red(post_url)
+            await msg.channel.send(media_link)
+
+from aiocfscrape import CloudflareScraper
+
+REDDIT_TUBE = 'https://www.reddit.tube'
+REDDIT_TUBE_SERVICE = 'https://www.reddit.tube/services/get_video?'
+async def reddit_tube(post_url):
+    async with CloudflareScraper() as session:
+        async def cfscrape(url):
+            async with session.get(url) as resp:
+                return await resp.text()
+
+        page = await cfscrape(REDDIT_TUBE)
+        soup = BeautifulSoup(page, HTML_PARSER)
+        token_input = soup.find(style="display:none;") or soup.find(type='hidden')
+        token_key, token_value = token_input['name'], token_input['value']
+
+        request_link = REDDIT_TUBE_SERVICE + urlencode({'url': post_url, token_key: token_value})
+        result = await cfscrape(request_link)
+        return json.loads(result).get('url')  
+
+SAVEMP4_RED = 'https://savemp4.red/backend.php?url='
+DOWNLOAD_BUTTON = 'downloadButton'
+async def savemp4_red(post_url):
+    request_link = SAVEMP4_RED + post_url + '/'
+    page = await utils.download(request_link)
+    soup = BeautifulSoup(page, HTML_PARSER)
+    mp4_link = soup.find(class_=DOWNLOAD_BUTTON)[HREF]
+    return mp4_link

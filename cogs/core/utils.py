@@ -1,6 +1,7 @@
 import aiohttp
 import mimetypes
 import requests_async as requests
+from discord.ext import commands
 
 def url_is_image(url):
     mimetype, encoding = mimetypes.guess_type(url)
@@ -21,3 +22,11 @@ async def request(url, method=''):
         return response.content
     else:
         return response.text
+
+def is_owner_testing():
+    async def predicate(ctx):
+        if not await ctx.bot.is_owner(ctx.author):
+            raise NotOwner('You do not own this bot.')
+        return env.TESTING
+
+    return commands.check(predicate)

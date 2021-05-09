@@ -7,6 +7,7 @@ import time
 from typing import Optional
 from discord.ext import commands, tasks
 from datetime import datetime
+from .core import utils
 from .core import converter as conv
 from .core.misc import covid, math, reddit
 from urllib.parse import quote_plus
@@ -101,6 +102,7 @@ class Misc(commands.Cog):
         await reddit.send_posts_in_embeds(context, sub, 'top', posts)
     
     @commands.Cog.listener()
+    @utils.is_owner_testing()
     async def on_message(self, msg):
         context = await self.bot.get_context(msg)
         await reddit.send_preview_for_link(context)
