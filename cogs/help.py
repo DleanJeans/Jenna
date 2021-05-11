@@ -216,10 +216,10 @@ class Help(commands.Cog):
                 f'[Jump]({msg.jump_url})'
             ])
             author_embed = colors.embed_error(description=msg.content).add_field(name='Source', value=source)
-            error_text = getattr(error.original, 'text') or error.original.args[0] if hasattr(error, 'original') else error
-            user_embed = colors.embed_error(title='Error', description=error_text)
-
-            await context.send(embed=user_embed)
+            error_text = getattr(error.original, 'text', None) if hasattr(error, 'original') else error
+            if error_text:
+                user_embed = colors.embed_error(title='Error', description=error_text)
+                await context.send(embed=user_embed)
             await self.bot.owner.send(f'```{exception}```', embed=author_embed)
 
 ignored_errors = (commands.CommandNotFound,)
