@@ -2,11 +2,12 @@ import colors
 import googletrans
 import re
 
+from urllib.parse import quote
 from discord.ext import commands
 from googletrans import LANGCODES, LANGUAGES, Translator
 
 GOOGLE_TRANSLATE = 'Google Translate'
-TRANSLATE_URL = 'https://translate.google.com/'
+TRANSLATE_URL = 'https://translate.google.com/?sl={}&tl={}&text={}&op=translate'
 INVALID_LANG_CODE = '`{}` is not a language code. Type `{}translate langs` to see the full language codes. You can also use full language names.'
 NO_TEXT = 'The last message has no text'
 SUPPORTED_LANGS = { 'auto': 'Automatic', **LANGUAGES, **LANGCODES}
@@ -76,7 +77,7 @@ async def translate(context, src2dest, text):
         except:
             translator = Translator()
     
-    translated.src2dest = f'{LANGUAGES[translated.src]}>{LANGUAGES[translated.dest]}'
+    translated.src2dest = f'{LANGUAGES[translated.src.lower()]}>{LANGUAGES[translated.dest.lower()]}'
     for word, meaning in CUSTOM_DICT.items():
         translated.text = translated.text.replace(word, meaning)
     
@@ -85,9 +86,9 @@ async def translate(context, src2dest, text):
 async def embed_translate(context, src2dest, text):
     translated = await translate(context, src2dest, text)
 
-    embed = colors.embed(description=translated.text)
-    embed.set_author(name=GOOGLE_TRANSLATE, url=TRANSLATE_URL)
-    embed.set_footer(text=f'{translated.src}>{translated.dest} ({translated.src2dest}):\n{text}')
+    translate_url = TRANSLATE_URL.format(translated.src, translated.dest, quote(text))
+    embed = colors.embed(title=GOOGLE_TRANSLATE, url=translate_url, description=translated.text, color=0x4a88ed)
+    embed.add_field(name=f'{translated.src2dest} ({translated.src}>{translated.dest}):', value=text)
 
     return embed
 
