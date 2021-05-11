@@ -41,7 +41,7 @@ def try_parse_src2dest(s):
 
 async def translate(context, src2dest, text):
     global translator
-    text = await get_last_message_if_text_none(context, text)
+    text, _ = await get_last_message_if_no_text(context, text)
 
     emojis_to_clean = re.findall(EMOJI_REGEX, text)
     for full, clean in emojis_to_clean:
@@ -49,7 +49,7 @@ async def translate(context, src2dest, text):
 
     src2dest = src2dest.lower().split('>')
     suffix_src2dest = try_parse_src2dest(text.split()[-1]).split('>')
-    if suffix_src2dest:
+    if ''.join(suffix_src2dest):
         text = text[:text.rfind(' ')]
         suffix_src2dest = suffix_src2dest
     
@@ -73,7 +73,7 @@ async def translate(context, src2dest, text):
                 dest = 'vi'
             else:
                 break
-        except e:
+        except:
             translator = Translator()
     
     translated.src2dest = f'{LANGUAGES[translated.src]}>{LANGUAGES[translated.dest]}'
@@ -91,11 +91,13 @@ async def embed_translate(context, src2dest, text):
 
     return embed
 
-async def get_last_message_if_text_none(context, text):
+async def get_last_message_if_no_text(context, text):
+    last_message = None
     if not text:
         last_message = await context.history(limit=1, before=context.message).flatten()
-        text = last_message[0].clean_content or translate.NO_TEXT
-    return text
+        last_message = last_message[0]
+        text = last_message.clean_content or translate.NO_TEXT
+    return text, last_message
 
 def get_supported_languages():
     output = '**Supported Languages**:\n'

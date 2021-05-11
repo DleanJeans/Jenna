@@ -38,8 +38,10 @@ class Texts(commands.Cog):
     @commands.command(aliases=['str'])
     async def saytranslate(self, context, src2dest:Optional[gtranslate.Src2Dest]='auto>en', *, text=None):
         await context.trigger_typing()
+        text, last_message = await gtranslate.get_last_message_if_no_text(context, text)
         translated = await gtranslate.translate(context, src2dest, text)
-        await context.reply(translated.text, mention_author=False)
+        where = last_message if last_message else context
+        await where.reply(translated.text, mention_author=False)
     
     @commands.group(aliases=['tr', 'tl'], invoke_without_command=True)
     async def translate(self, context, src2dest:Optional[gtranslate.Src2Dest]='auto>en', *, text=None):
