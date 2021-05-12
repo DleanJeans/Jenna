@@ -1,7 +1,7 @@
 import discord
 import re
 import const
-import cogs
+import cogs as coglist
 import importlib
 import sys
 import traceback
@@ -106,17 +106,20 @@ class Alpha(commands.Cog):
 
     @commands.command(aliases=['rl', 'rlc'])
     @commands.is_owner()
-    async def reloadcog(self, context, *, cog=ALL):
+    async def reloadcog(self, context, *, cogs=ALL):
         await context.trigger_typing()
         responses = []
-        cog = cogs.NAMES if cog == ALL else cog.split()
+        cogs = coglist.NAMES if cogs == ALL else cogs.split()
         
-        for cog_name in cog:
+        for cog_name in cogs:
             cog_path = 'cogs.' + cog_name
             response = 'Cog `%s`' % cog_name
 
             try:
                 self.bot.reload_extension(cog_path)
+                cog = self.bot.get_cog(cog_name.title())
+                if 'on_ready' in dir(cog):
+                    await cog.on_ready()
                 response = f'✅ {response} reloaded!'
             except:
                 traceback.print_exc()
