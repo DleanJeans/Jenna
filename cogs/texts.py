@@ -39,8 +39,8 @@ class Texts(commands.Cog):
     @commands.command(aliases=['str'])
     async def saytranslate(self, context, src2dest:Optional[gtranslate.Src2Dest]='auto>en', *, text=None):
         await context.trigger_typing()
-        text, ref_message = self.use_ref_message_if_no_text(context, text)
-        text, last_message = await gtranslate.get_last_message_if_no_text(context, text)
+        text, ref_message = utils.get_ref_message_text_if_no_text(context, text)
+        text, last_message = await utils.get_last_message_text_if_no_text(context, text)
         translated = await gtranslate.translate(context, src2dest, text)
         where = ref_message or last_message or context
         await where.reply(translated.text, mention_author=False)
@@ -48,23 +48,15 @@ class Texts(commands.Cog):
     @commands.group(aliases=['tr', 'tl'], invoke_without_command=True)
     async def translate(self, context, src2dest:Optional[gtranslate.Src2Dest]='auto>en', *, text=None):
         await context.trigger_typing()
-        text, ref_message = self.use_ref_message_if_no_text(context, text)
+        text, _ = utils.get_ref_message_text_if_no_text(context, text)
         embed = await gtranslate.embed_translate(context, src2dest, text)
         await context.send(embed=embed)
-    
-    def use_ref_message_if_no_text(self, context, text):
-        if text:
-            return text, None
-        ref_message = utils.get_referenced_message(context.message)
-        if not text and ref_message:
-            text = ref_message.clean_content
-        return text, ref_message
 
     @translate.command(name='langs', aliases=['lang'])
     async def translatelangs(self, context):
         output = gtranslate.get_supported_languages()
         await context.message.author.send(output)
-        await utils.react_tick(context.message)
+        await utils.emotes.react_tick(context.message)
 
     @commands.command(aliases=['rdw'])
     async def randomword(self, context, lang='en'):

@@ -36,3 +36,9 @@ def expand(name, id):
         a = 'a'
         id = id[1:]
     return f'<{a}:{name}:{id}>'
+
+async def react_tick(message):
+    try:
+        await message.add_reaction('✅')
+    except:
+        pass

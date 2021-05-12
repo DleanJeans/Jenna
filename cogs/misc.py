@@ -102,9 +102,10 @@ class Misc(commands.Cog):
         await reddit.send_posts_in_embeds(context, sub, 'top', posts)
     
     @commands.Cog.listener()
-    @utils.is_owner_testing()
     async def on_message(self, msg):
         context = await self.bot.get_context(msg)
+        if await utils.is_user_on_local(context):
+            return
         await reddit.send_preview_for_link(context)
 
 def setup(bot):

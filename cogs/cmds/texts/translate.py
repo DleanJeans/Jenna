@@ -2,6 +2,7 @@ import colors
 import googletrans
 import re
 
+from ...core import utils
 from urllib.parse import quote
 from discord.ext import commands
 from googletrans import LANGCODES, LANGUAGES, Translator
@@ -42,7 +43,7 @@ def try_parse_src2dest(s):
 
 async def translate(context, src2dest, text):
     global translator
-    text, _ = await get_last_message_if_no_text(context, text)
+    text, _ = await utils.get_last_message_text_if_no_text(context, text) or NO_TEXT
 
     emojis_to_clean = re.findall(EMOJI_REGEX, text)
     for full, clean in emojis_to_clean:
@@ -92,14 +93,6 @@ async def embed_translate(context, src2dest, text):
     embed.add_field(name=f'{translated.src2dest} ({translated.src}>{translated.dest}):', value=text)
 
     return embed
-
-async def get_last_message_if_no_text(context, text):
-    last_message = None
-    if not text:
-        last_message = await context.history(limit=1, before=context.message).flatten()
-        last_message = last_message[0]
-        text = last_message.clean_content or NO_TEXT
-    return text, last_message
 
 def get_supported_languages():
     output = '**Supported Languages**:\n'

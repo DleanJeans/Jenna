@@ -4,7 +4,7 @@ import mimetypes
 import env
 import requests_async as requests
 from discord.ext import commands
-from ..core.emotes.utils import react_tick
+from ..core.emotes import utils as emotes
 
 def url_is_image(url):
     mimetype, encoding = mimetypes.guess_type(url)
@@ -26,13 +26,11 @@ async def request(url, method=''):
     else:
         return response.text
 
-def is_owner_testing():
-    async def predicate(ctx):
-        if not await ctx.bot.is_owner(ctx.author):
-            raise discord.NotOwner('You do not own this bot.')
-        return env.TESTING
+async def is_owner_testing(ctx):
+    return env.TESTING and await ctx.bot.is_owner(ctx.author)
 
-    return commands.check(predicate)
+async def is_user_on_local(ctx):
+    return env.LOCAL and not await is_owner_testing(ctx)
 
 def get_referenced_message(message):
     ref = message.reference
@@ -42,3 +40,19 @@ def get_referenced_message(message):
         if type(ref_message) is discord.DeletedReferencedMessage:
             return
     return ref_message
+
+def get_ref_message_text_if_no_text(message, text=''):
+    if type(message) is commands.Context:
+        message = message.message
+    ref = get_referenced_message(message)
+    if not text and ref:
+        text = ref.content
+    return text, ref
+
+async def get_last_message_text_if_no_text(context, text=''):
+    last_message = None
+    if not text:
+        last_message = await context.history(limit=1, before=context.message).flatten()
+        last_message = last_message[0]
+        text = last_message.content
+    return text, last_message
