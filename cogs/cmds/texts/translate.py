@@ -71,6 +71,7 @@ async def translate(context, src2dest, text):
         try:
             translated = translator.translate(text, src=src, dest=dest)
             if translated.src == translated.dest == 'en':
+                src = 'en'
                 dest = 'vi'
             else:
                 break
@@ -97,7 +98,7 @@ async def get_last_message_if_no_text(context, text):
     if not text:
         last_message = await context.history(limit=1, before=context.message).flatten()
         last_message = last_message[0]
-        text = last_message.clean_content or translate.NO_TEXT
+        text = last_message.clean_content or NO_TEXT
     return text, last_message
 
 def get_supported_languages():

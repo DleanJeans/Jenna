@@ -4,6 +4,7 @@ from .cmds.texts import define
 from .cmds.texts import translate as gtranslate
 from .core.texts import palabrasaleatorias as pa
 from .core.texts import randomword
+from .core import utils
 from typing import Optional
 
 import colors
@@ -38,22 +39,32 @@ class Texts(commands.Cog):
     @commands.command(aliases=['str'])
     async def saytranslate(self, context, src2dest:Optional[gtranslate.Src2Dest]='auto>en', *, text=None):
         await context.trigger_typing()
+        text, ref_message = self.use_ref_message_if_no_text(context, text)
         text, last_message = await gtranslate.get_last_message_if_no_text(context, text)
         translated = await gtranslate.translate(context, src2dest, text)
-        where = last_message if last_message else context
+        where = ref_message or last_message or context
         await where.reply(translated.text, mention_author=False)
     
     @commands.group(aliases=['tr', 'tl'], invoke_without_command=True)
     async def translate(self, context, src2dest:Optional[gtranslate.Src2Dest]='auto>en', *, text=None):
         await context.trigger_typing()
+        text, ref_message = self.use_ref_message_if_no_text(context, text)
         embed = await gtranslate.embed_translate(context, src2dest, text)
         await context.send(embed=embed)
+    
+    def use_ref_message_if_no_text(self, context, text):
+        if text:
+            return text, None
+        ref_message = utils.get_referenced_message(context.message)
+        if not text and ref_message:
+            text = ref_message.clean_content
+        return text, ref_message
 
     @translate.command(name='langs', aliases=['lang'])
     async def translatelangs(self, context):
         output = gtranslate.get_supported_languages()
         await context.message.author.send(output)
-        await context.send('Supported Languages has been sent through DM!')
+        await utils.react_tick(context.message)
 
     @commands.command(aliases=['rdw'])
     async def randomword(self, context, lang='en'):

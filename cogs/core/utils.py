@@ -1,7 +1,10 @@
 import aiohttp
+import discord
 import mimetypes
+import env
 import requests_async as requests
 from discord.ext import commands
+from ..core.emotes.utils import react_tick
 
 def url_is_image(url):
     mimetype, encoding = mimetypes.guess_type(url)
@@ -26,7 +29,16 @@ async def request(url, method=''):
 def is_owner_testing():
     async def predicate(ctx):
         if not await ctx.bot.is_owner(ctx.author):
-            raise NotOwner('You do not own this bot.')
+            raise discord.NotOwner('You do not own this bot.')
         return env.TESTING
 
     return commands.check(predicate)
+
+def get_referenced_message(message):
+    ref = message.reference
+    ref_message = None
+    if ref:
+        ref_message = ref.cached_message or ref.resolved
+        if type(ref_message) is discord.DeletedReferencedMessage:
+            return
+    return ref_message
