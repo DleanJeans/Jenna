@@ -171,10 +171,7 @@ class Emotes(commands.Cog):
         await self.reply_emojis(msg)
     
     def get_known_emoji(self, name):
-        def added_by_me(e):
-            return -1 if e.user == self.bot.user else self.bot.emojis.index(e)
-        emojis = sorted(self.bot.emojis, key=added_by_me)
-        return discord.utils.get(emojis, name=name)
+        return discord.utils.get(self.bot.emojis, name=name)
 
     async def reply_emojis(self, msg):
         context = await self.bot.get_context(msg)
