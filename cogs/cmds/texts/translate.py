@@ -33,7 +33,16 @@ def Src2Dest(s):
     src, dest = re.findall(SRC2DEST_REGEX, s)[0]
     src = src or 'auto'
     dest = dest or 'en'
+
+    src, dest = map(fix_zh, [src, dest])
+
     return '>'.join([src, dest])
+
+def fix_zh(lang):
+    lang = lang.replace('_', '-')
+    if lang.startswith('zh') and lang not in SUPPORTED_LANGS:
+        return 'zh-cn'
+    return lang
 
 def try_parse_src2dest(s):
     try:
@@ -82,7 +91,8 @@ async def translate(context, src2dest, text):
     translated.src2dest = f'{LANGUAGES[translated.src.lower()]}>{LANGUAGES[translated.dest.lower()]}'
     for word, meaning in CUSTOM_DICT.items():
         translated.text = translated.text.replace(word, meaning)
-    
+    translated.original_text = text
+
     return translated
 
 async def embed_translate(context, src2dest, text):
@@ -90,7 +100,7 @@ async def embed_translate(context, src2dest, text):
 
     translate_url = TRANSLATE_URL.format(translated.src, translated.dest, quote(text))
     embed = colors.embed(title=GOOGLE_TRANSLATE, url=translate_url, description=translated.text, color=0x4a88ed)
-    embed.add_field(name=f'{translated.src2dest} ({translated.src}>{translated.dest}):', value=text)
+    embed.add_field(name=f'{translated.src2dest} ({translated.src}>{translated.dest}):', value=translated.original_text)
 
     return embed
 
