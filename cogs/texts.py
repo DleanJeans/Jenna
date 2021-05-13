@@ -49,6 +49,7 @@ class Texts(commands.Cog):
     async def translate(self, context, src2dest:Optional[gtranslate.Src2Dest]='auto>en', *, text=None):
         await context.trigger_typing()
         text, _ = utils.get_ref_message_text_if_no_text(context, text)
+        text, _ = await utils.get_last_message_text_if_no_text(context, text)
         embed = await gtranslate.embed_translate(context, src2dest, text)
         await context.send(embed=embed)
 

@@ -11,7 +11,7 @@ GOOGLE_TRANSLATE = 'Google Translate'
 TRANSLATE_URL = 'https://translate.google.com/?sl={}&tl={}&text={}&op=translate'
 INVALID_LANG_CODE = '`{}` is not a language code. Type `{}translate langs` to see the full language codes. You can also use full language names.'
 NO_TEXT = 'The last message has no text'
-SUPPORTED_LANGS = { 'auto': 'Automatic', **LANGUAGES, **LANGCODES}
+SUPPORTED_LANGS = { 'auto': 'Automatic', **LANGUAGES, **LANGCODES, '???': '???'}
 
 EMOJI_REGEX = '(<a*(:[^:\s]+:)\d+>)'
 CUSTOM_DICT = {
@@ -52,7 +52,7 @@ def try_parse_src2dest(s):
 
 async def translate(context, src2dest, text):
     global translator
-    text, _ = await utils.get_last_message_text_if_no_text(context, text) or NO_TEXT
+    text = text or NO_TEXT
 
     emojis_to_clean = re.findall(EMOJI_REGEX, text)
     for full, clean in emojis_to_clean:
@@ -77,7 +77,7 @@ async def translate(context, src2dest, text):
         'dest': '???',
         'src2dest': ''
     })
-    for i in range(5):
+    for i in range(3):
         try:
             translated = translator.translate(text, src=src, dest=dest)
             if translated.src == translated.dest == 'en':
@@ -85,10 +85,12 @@ async def translate(context, src2dest, text):
                 dest = 'vi'
             else:
                 break
+        except TypeError:
+            raise commands.BadArgument('Too short to translate :(')
         except:
             translator = Translator()
     
-    translated.src2dest = f'{LANGUAGES[translated.src.lower()]}>{LANGUAGES[translated.dest.lower()]}'
+    translated.src2dest = f'{SUPPORTED_LANGS[translated.src.lower()]}>{SUPPORTED_LANGS[translated.dest.lower()]}'
     for word, meaning in CUSTOM_DICT.items():
         translated.text = translated.text.replace(word, meaning)
     translated.original_text = text
