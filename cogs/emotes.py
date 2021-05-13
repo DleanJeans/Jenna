@@ -160,7 +160,7 @@ class Emotes(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, msg):
-        if msg.author == self.bot.user: return
+        if msg.author.bot: return
         context = await self.bot.get_context(msg)
         if context.command:
             return
