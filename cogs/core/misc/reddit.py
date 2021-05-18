@@ -230,6 +230,9 @@ async def get_media_urls_from_post_ids(post_ids):
             continue
 
         media_url = post_data[MEDIA_URL]
+        is_crosspost = media_url.startswith('/r/')
+        if is_crosspost:
+            continue
         if VREDDIT in media_url:
             media_url = await reddit_tube(post_url)
             if not media_url:
