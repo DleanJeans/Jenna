@@ -214,12 +214,12 @@ async def send_posts_in_embeds(context, sub, sorting, posts, period):
             await msg.edit(embed=embed)
 
 
-REDDIT_POST_REGEX = r'https://(?:\w+\.)?(?:reddit\.com(?:/r/\w+/comments)?|redd\.it)/(\w+)'
+REDDIT_POST_REGEX = r'(?:\w+\.)?(?:reddit\.com(?:/r/\w+/comments)?|redd\.it)/(\w+)'
 HREF = 'href'
 JSON = '.json'
 MEDIA_URL = 'url_overridden_by_dest'
 REDDIT_COM = 'https://www.reddit.com/'
-async def send_preview_for_link(context):
+async def send_media_link(context):
     msg = context.message
     post_ids = re.findall(REDDIT_POST_REGEX, msg.content)
     
@@ -261,10 +261,10 @@ async def reddit_tube(post_url):
         result = await cfscrape(request_link)
         return json.loads(result).get('url')  
 
-SAVEMP4_RED = 'https://savemp4.red/backend.php?url='
+SAVEMP4_RED = 'https://savemp4.red/backend.php?url={}/'
 DOWNLOAD_BUTTON = 'downloadButton'
 async def savemp4_red(post_url):
-    request_link = SAVEMP4_RED + post_url + '/'
+    request_link = SAVEMP4_RED.format(post_url)
     page = await utils.download(request_link)
     soup = BeautifulSoup(page, HTML_PARSER)
     mp4_link = soup.find(class_=DOWNLOAD_BUTTON)[HREF]
