@@ -21,7 +21,7 @@ MAX_TITLE = 250
 
 VREDDIT = 'v.redd.it'
 GFYCAT = 'gfycat'
-SPECIAL_WEBSITES = [VREDDIT, GFYCAT, 'twitter', 'imgur', 'youtu']
+SPECIAL_WEBSITES = [GFYCAT, 'twitter', 'imgur', 'youtu']
 def is_special_website(url):
     return any(site in url for site in SPECIAL_WEBSITES)
 
@@ -181,7 +181,6 @@ async def send_posts_in_embeds(context, sub, sorting, posts, period):
     sub_url = compile_url(sub, sorting, period, link=SUB_URL)
     period = PERIODS_TO_DISPLAY.get(period, period).title()
 
-    vreddit_posts = []
     for i in posts:
         post = get_entry_in_rss(rss, i, sorting)
         title = ' '.join(filter(None, [sorting.title(), f'#{i+1}', period]))
@@ -197,21 +196,9 @@ async def send_posts_in_embeds(context, sub, sorting, posts, period):
         msg = await context.send(embed=embed)
 
         if is_special_website(post.content_url):
-            extra_msg = await context.send(post.content_url)
-            if VREDDIT in post.content_url:
-                vreddit_posts += [(msg, extra_msg)]
-        
-    for msg, extra_msg in vreddit_posts:
-        while not extra_msg.embeds:
-            await asyncio.sleep(1)
-            extra_msg = await extra_msg.channel.fetch_message(extra_msg.id)
-            continue
-        url = extra_msg.embeds and extra_msg.embeds[0].thumbnail.url
-        if url:
-            embed = msg.embeds[0]
-            embed.set_image(url=url).set_thumbnail(url='')
-            await extra_msg.delete()
-            await msg.edit(embed=embed)
+            await context.send(post.content_url)
+        elif VREDDIT in post.content_url:
+            await send_media_url_for_post_url(context, post.url)
 
 
 REDDIT_POST_REGEX = r'(?:\w+\.)?(?:reddit\.com(?:/r/\w+/comments)?|redd\.it)/(\w+)'
@@ -219,10 +206,19 @@ HREF = 'href'
 JSON = '.json'
 MEDIA_URL = 'url_overridden_by_dest'
 REDDIT_COM = 'https://www.reddit.com/'
-async def send_media_link(context):
+
+async def detect_post_url_to_send_media_url(context):
     msg = context.message
-    post_ids = re.findall(REDDIT_POST_REGEX, msg.content)
-    
+    await send_media_url_for_post_url(context, msg.content)
+
+async def send_media_url_for_post_url(context, url):
+    post_ids = re.findall(REDDIT_POST_REGEX, url)
+    media_urls = await get_media_urls_from_post_ids(post_ids)
+    for url in media_urls:
+        await context.send(url)
+
+async def get_media_urls_from_post_ids(post_ids):
+    media_urls = []
     for id in post_ids:
         post_url = urljoin(REDDIT_COM, id)
         json_link = post_url + JSON
@@ -230,17 +226,17 @@ async def send_media_link(context):
         json_data = json.loads(json_data)
         post_data = json_data[0]['data']['children'][0]['data']
         post_url = urljoin(REDDIT_COM, post_data['permalink'])
-
         if MEDIA_URL not in post_data:
             continue
 
-        with context.typing():
-            media_link = post_data[MEDIA_URL]
-            if VREDDIT in media_link:
-                media_link = await reddit_tube(post_url)
-                if not media_link:
-                    media_link = await savemp4_red(post_url)
-            await msg.channel.send(media_link)
+        media_url = post_data[MEDIA_URL]
+        if VREDDIT in media_url:
+            media_url = await reddit_tube(post_url)
+            if not media_url:
+                media_url = await savemp4_red(post_url)
+        media_urls.append(media_url)
+    
+    return media_urls
 
 from aiocfscrape import CloudflareScraper
 
