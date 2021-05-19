@@ -16,12 +16,12 @@ from .core import embed_limit, utils
 from .core.emotes import external
 from discord.ext import commands
 from typing import Optional, Union
+from env import HOME_GUILD, EMOTES_BUFFER_GUILD
 
 EMOTES_PER_PAGE = 25
 EMOJI_PATTERN = '(:[^:\s]+:)(?!\d)'
 REAL_EMOJI_PATTERN = '(<a*:[^:\s]+:\d+>)'
 EMOJI_NAME_REGEX = ':([^:\s]+):'
-HOME_GUILD = 596171359747440657
 EMBED_BACKCOLOR = 0x2f3136
 START_QUOTE = '> '
 
@@ -156,7 +156,7 @@ class Emotes(commands.Cog):
             await external.delete()
     
     async def add_emoji(self, emoji):
-        return await self.bot.get_guild(HOME_GUILD).create_custom_emoji(name=emoji.name, image=await emoji.url.read())
+        return await self.bot.get_guild(EMOTES_BUFFER_GUILD).create_custom_emoji(name=emoji.name, image=await emoji.url.read())
 
     @commands.Cog.listener()
     async def on_message(self, msg):
