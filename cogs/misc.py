@@ -106,7 +106,7 @@ class Misc(commands.Cog):
         context = await self.bot.get_context(msg)
         if await utils.is_user_on_local(context):
             return
-        await reddit.send_media_link(context)
+        await reddit.detect_post_url_to_send_media_url(context)
 
 def setup(bot):
     bot.add_cog(Misc(bot))
