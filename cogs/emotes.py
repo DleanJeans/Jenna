@@ -170,7 +170,21 @@ class Emotes(commands.Cog):
             return
         await self.reply_emojis(msg)
     
-    def get_known_emoji(self, name):
+    def get_known_emoji(self, name, user=None):
+        def score_relevance(emoji):
+            in_guild = emoji.guild in user.mutual_guilds
+            total_score = in_guild * 100
+            if in_guild:
+                member = emoji.guild.get_member(user.id)
+                sum_roles = sum([r.position for r in member.roles])
+                is_owner = emoji.guild.owner == member
+                total_score += sum_roles + is_owner * 100
+            return total_score
+
+        if user:
+            duplicates = [e for e in self.bot.emojis if e.name == name]
+            duplicates.sort(key=score_relevance, reverse=True)
+            return duplicates[0]
         return discord.utils.get(self.bot.emojis, name=name)
 
     async def reply_emojis(self, msg):
@@ -185,7 +199,7 @@ class Emotes(commands.Cog):
 
         for emoji in matches:
             name = emoji.replace(':', '')
-            emoji = self.get_known_emoji(name)
+            emoji = self.get_known_emoji(name, msg.author)
             if not emoji:
                 emoji = await self.get_external_emoji(context, name, add=True)
                 if not emoji: continue
