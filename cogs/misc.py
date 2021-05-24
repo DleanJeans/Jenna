@@ -29,12 +29,6 @@ class Misc(commands.Cog):
         url = 'https://www.google.com/search?q=' + query
         await context.send(url)
 
-    @commands.command(hidden=True)
-    async def do(self, context, subcommand, *, line=None):
-        if subcommand not in ['math', 'meth']:
-            line = subcommand + line
-        await math.compute(context, line)
-
     @commands.command(aliases=['meth'])
     async def math(self, context, *, line):
         await math.compute(context, line)
