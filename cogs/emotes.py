@@ -58,7 +58,6 @@ class Emotes(commands.Cog):
     async def enlarge(self, context, emoji:Optional[conv.NitroEmoji]):
         await context.trigger_typing()
         emoji = await self.get_emote_from_reference_or_last_message(context, emoji)
-        emoji = discord.utils.get(context.bot.emojis, name=emoji) or emoji
         if type(emoji) is not discord.Emoji:
             emoji = await self.get_external_emoji(context, emoji) or emoji
         url, single_url = utils.emotes.get_url(emoji)
@@ -170,23 +169,6 @@ class Emotes(commands.Cog):
             return
         await self.reply_emojis(msg)
     
-    def get_known_emoji(self, name, user=None):
-        def score_relevance(emoji):
-            in_guild = emoji.guild in user.mutual_guilds
-            total_score = in_guild * 100
-            if in_guild:
-                member = emoji.guild.get_member(user.id)
-                sum_roles = sum([r.position for r in member.roles])
-                is_owner = emoji.guild.owner == member
-                total_score += sum_roles + is_owner * 100
-            return total_score
-
-        if user:
-            duplicates = [e for e in self.bot.emojis if e.name == name]
-            duplicates.sort(key=score_relevance, reverse=True)
-            return duplicates[0]
-        return discord.utils.get(self.bot.emojis, name=name)
-
     async def reply_emojis(self, msg):
         context = await self.bot.get_context(msg)
         matches = []
@@ -199,7 +181,7 @@ class Emotes(commands.Cog):
 
         for emoji in matches:
             name = emoji.replace(':', '')
-            emoji = self.get_known_emoji(name, msg.author)
+            emoji = conv.get_known_emoji(self.bot.emojis, name, msg.author)
             if not emoji:
                 emoji = await self.get_external_emoji(context, name, add=True)
                 if not emoji: continue
@@ -230,7 +212,7 @@ class Emotes(commands.Cog):
 
         for e in emojis:
             partial = await utils.emotes.to_partial_emoji(context, e) if isinstance(e, str) else e
-            known = self.get_known_emoji(partial.name)
+            known = conv.get_known_emoji(self.bot.emojis, partial.name)
             if not known:
                 id = utils.emotes.shorten(e)
                 self.external_emojis[partial.name] = str(e)
@@ -279,7 +261,7 @@ class Emotes(commands.Cog):
                 if not name:
                     name = 'emoji%04d' % random.randint(0, 9999)
                 await context.guild.create_custom_emoji(name=name, image=image)
-                response = self.get_known_emoji(name)
+                response = conv.get_known_emoji(self.bot.emojis, name, context.author)
             await context.message.add_reaction(response)
 
 async def download_image(url):
