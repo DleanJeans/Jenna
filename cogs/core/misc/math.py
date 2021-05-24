@@ -6,6 +6,7 @@ MATH_OPERATIONS = {
     ',': '',
     '^': '**',
     ' ': '',
+    '%': '/100'
 }
 
 async def compute(context, expr):
@@ -17,8 +18,8 @@ async def compute(context, expr):
     try:
         value = eval(expr)
         if value is not None:
-            value = f'{value:,}'
-            response = f"That's `{value}`"
+            value = str(value).rstrip('0').rstrip('.')
+            response = f'**=** `{value}`'
             await context.send(response)
     except Exception as e:
         await context.message.add_reaction('⁉️')
