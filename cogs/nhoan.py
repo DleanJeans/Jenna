@@ -60,24 +60,6 @@ class Nhoan(commands.Cog, name='Nhoặn'):
             return enumerate(allnhoan_top[:count], start = 1)
         else:
             return enumerate(allnhoan_top, start = 1)
-        
-    @commands.Cog.listener()
-    async def on_message(self, msg):
-        ctx = await self.bot.get_context(msg)
-        if ctx.command or not ctx.prefix: return
-
-        content = msg.content
-        content = content.replace(ctx.prefix, '', 1) if ctx.prefix and content.startswith(ctx.prefix) else content
-
-        for nhoan in NHOAN_SYNONYMS:
-            if nhoan in content.split():
-                possible_name = content.split(nhoan)[0].strip()
-                try:
-                    member = await conv.members.FuzzyMemberConverter().convert(ctx, possible_name)
-                    await self.bump_nhoan_count(ctx, member)
-                except:
-                    pass
-                return
     
     @commands.command(aliases = ['nhoặn', 'nh', 'cringe', 'crimge'])
     async def nhoan(self, ctx, member: Optional[conv.FuzzyMember] = None):
