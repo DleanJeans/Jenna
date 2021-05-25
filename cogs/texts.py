@@ -5,6 +5,7 @@ from .cmds.texts import translate as gtranslate
 from .core.texts import palabrasaleatorias as pa
 from .core.texts import randomword
 from .core import utils
+from .core import converter as conv
 from typing import Optional
 
 import colors
@@ -99,11 +100,10 @@ class Texts(commands.Cog):
     @commands.command()
     async def say(self, context, *, text):
         from .emotes import EMOJI_PATTERN
-        Emotes = self.bot.get_cog('Emotes')
-
+        
         for plain_emoji in set(re.findall(EMOJI_PATTERN, text)):
             name = plain_emoji.strip(':')
-            emoji_code = Emotes.get_known_emoji(name)
+            emoji_code = conv.get_known_emoji(self.bot.emojis, name)
             if not emoji_code:
                 emoji_code = await Emotes.get_external_emoji(context, name, add=True)
                 if not emoji_code: continue
