@@ -197,7 +197,7 @@ async def send_posts_in_embeds(context, sub, sorting, posts, period):
 
         if is_special_website(post.content_url):
             await context.send(post.content_url)
-        elif VREDDIT in post.content_url:
+        elif VREDDIT in post.content_url or REDDIT_GALLERY in post.content_url:
             await send_media_url_for_post_url(context, post.url)
 
 
@@ -206,6 +206,7 @@ HREF = 'href'
 JSON = '.json'
 MEDIA_URL = 'url_overridden_by_dest'
 REDDIT_COM = 'https://www.reddit.com/'
+REDDIT_GALLERY = REDDIT_COM + 'gallery/'
 
 async def detect_post_url_to_send_media_url(context):
     msg = context.message
@@ -214,8 +215,8 @@ async def detect_post_url_to_send_media_url(context):
 async def send_media_url_for_post_url(context, url):
     post_ids = re.findall(REDDIT_POST_REGEX, url)
     media_urls = await get_media_urls_from_post_ids(post_ids)
-    for url in media_urls:
-        await context.send(url)
+    if media_urls:
+        await context.send('\n'.join(media_urls))
 
 async def get_media_urls_from_post_ids(post_ids):
     media_urls = []
@@ -237,7 +238,14 @@ async def get_media_urls_from_post_ids(post_ids):
             media_url = await reddit_tube(post_url)
             if not media_url:
                 media_url = await savemp4_red(post_url)
-        media_urls.append(media_url)
+        
+        if REDDIT_GALLERY in media_url:
+            media_metadata = post_data['media_metadata']
+            for id, data in media_metadata.items():
+                image_data = data['s']
+                media_urls.append(image_data['u'].replace('&amp;', '&'))
+        else:
+            media_urls.append(media_url)
     
     return media_urls
 
