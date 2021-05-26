@@ -13,20 +13,11 @@ import io
 from .cmds.emotes import spell, reactspell
 from .core import converter as conv
 from .core import embed_limit, utils
-from .core.emotes import external
+from .core.emotes import external, webhook
+from .core.emotes.const import *
 from discord.ext import commands
 from typing import Optional, Union
 from env import HOME_GUILD, EMOTES_BUFFER_GUILD
-
-EMOTES_PER_PAGE = 25
-EMOJI_PATTERN = '(:[^:\s]+:)(?!\d)'
-REAL_EMOJI_PATTERN = '(<a*:[^:\s]+:\d+>)'
-EMOJI_NAME_REGEX = ':([^:\s]+):'
-EMBED_BACKCOLOR = 0x2f3136
-START_QUOTE = '> '
-
-EXTERNAL_EMOJIS = 'external_emojis'
-
 class Emotes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -35,11 +26,12 @@ class Emotes(commands.Cog):
     
     @commands.Cog.listener()
     async def on_ready(self):
+        self.React = self.bot.get_cog(cogs.REACT)
         self.Persist = self.bot.get_cog(cogs.PERSIST)
         await self.Persist.wait_until_loaded()
         self.external_emojis = self.Persist.get(EXTERNAL_EMOJIS, {})
         self.Persist.set(EXTERNAL_EMOJIS, self.external_emojis)
-    
+
     @commands.command(aliases=['s'])
     async def spell(self, context, *, text):
         await spell(context, text)
@@ -165,10 +157,10 @@ class Emotes(commands.Cog):
             return
         await self.cache_external_emojis(msg)
         
-        if env.LOCAL:
+        if await utils.is_user_on_local(context):
             return
         await self.reply_emojis(msg)
-    
+
     async def reply_emojis(self, msg):
         context = await self.bot.get_context(msg)
         matches = []
@@ -192,11 +184,11 @@ class Emotes(commands.Cog):
         
         if emojis:
             emojis = ''.join(emojis)
-            await msg.channel.send(emojis)
+            await webhook.try_send(self, context, emojis)
         
         for e in externals:
             await e.delete()
-
+    
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         emoji = reaction.emoji

@@ -13,7 +13,7 @@ from .core.misc import covid, math, reddit
 from urllib.parse import quote_plus
 
 MATH_BRIEF = 'Compute big numbers for you'
-INVITE_LINK = 'https://discordapp.com/api/oauth2/authorize?client_id=664109951781830666&permissions=1342565440&scope=bot'
+INVITE_LINK = 'https://discord.com/api/oauth2/authorize?client_id=664109951781830666&permissions=3758484544&scope=bot'
 
 class Misc(commands.Cog):
     def __init__(self, bot):

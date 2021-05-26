@@ -9,19 +9,21 @@ X = '❌'
 OK = '✅'
 
 class Reactable:
-    def __init__(self, msg, user=[]):
-        if not isinstance(user, Iterable):
-            user = [user]
+    def __init__(self, msg, users=[]):
+        if not isinstance(users, Iterable):
+            users = [users]
         self.msg = msg
-        self.user = user
+        self.users = users
         self.callbacks_by_emoji = {}
     
     def add_button(self, emoji, callback):
         self.callbacks_by_emoji[emoji] = callback
     
     def get_callback(self, reaction, user):
+        if self.users and user not in self.users:
+            return
         for emoji, callback in self.callbacks_by_emoji.items():
-            if reaction.emoji == emoji and user in self.user:
+            if reaction.emoji == emoji:
                 return callback
 
 class React(commands.Cog):
@@ -30,27 +32,31 @@ class React(commands.Cog):
         self.reactables = {}
     
     async def delete(self, reaction, user):
-        message = reaction.message
-        await message.delete()
-        self.remove_reactable(message)
+        try:
+            message = reaction.message
+            await message.delete()
+            self.remove_reactable(message)
+        except discord.errors.Forbidden:
+            error_msg = await message.channel.send(f'I need `Manage Messages` permission to {X} delete your message.')
+            await self.add_delete_button(error_msg)
     
     def remove_reactable(self, message):
         if message.id in self.reactables:
             self.reactables.pop(message.id)
         
-    async def add_delete_button(self, message, user=[]):
-        await self.add_button(message, OK, self.delete, user)
+    async def add_delete_button(self, message, users=[], emote=X):
+        await self.add_button(message, emote, self.delete, users)
 
-    async def add_buttons(self, message, emojis, callback, user=[]):
+    async def add_buttons(self, message, emojis, callback, users=[]):
         try:
             for e in emojis:
-                await self.add_button(message, e, callback, user)
+                await self.add_button(message, e, callback, users)
         except:
             pass # message deleted while adding
 
-    async def add_button(self, message, emoji, callback, user=[]):
+    async def add_button(self, message, emoji, callback, users=[]):
         if message.id not in self.reactables:
-            self.reactables[message.id] = Reactable(message, user)
+            self.reactables[message.id] = Reactable(message, users)
         reactable = self.reactables[message.id]
         emoji = await self.add_reaction(message, emoji)
         reactable.add_button(emoji, callback)
@@ -70,9 +76,11 @@ class React(commands.Cog):
         await self.process_reaction(reaction, user)
 
     async def process_reaction(self, reaction, user):
-        if user == self.bot.user: return
+        if user.bot: return
+
         reactable = self.reactables.get(reaction.message.id)
         if not reactable: return
+
         callback = reactable.get_callback(reaction, user)
         if callback:
             await callback(reaction, user)
