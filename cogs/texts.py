@@ -99,8 +99,9 @@ class Texts(commands.Cog):
     
     @commands.command()
     async def say(self, context, *, text):
+        Emotes = self.bot.get_cog('Emotes')
+
         from .emotes import EMOJI_PATTERN
-        
         for plain_emoji in set(re.findall(EMOJI_PATTERN, text)):
             name = plain_emoji.strip(':')
             emoji_code = conv.get_known_emoji(self.bot.emojis, name)
