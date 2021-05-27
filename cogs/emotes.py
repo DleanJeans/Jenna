@@ -50,8 +50,10 @@ class Emotes(commands.Cog):
     async def enlarge(self, ctx, emoji:Optional[conv.NitroEmoji]):
         await ctx.trigger_typing()
         emoji = await self.get_emote_from_reference_or_last_message(ctx, emoji)
-        if type(emoji) is not discord.Emoji:
-            emoji = await self.get_external_emoji(ctx, emoji) or emoji
+        if type(emoji) not in [discord.Emoji, discord.PartialEmoji]:
+            emoji = conv.get_known_emoji(ctx.bot.emojis, emoji)
+            if not emoji:
+                emoji = await self.get_external_emoji(ctx, emoji) or emoji
         url, single_url = utils.emotes.get_url(emoji)
         if isinstance(emoji, str) and emoji[0].isalpha():
             url = ''
