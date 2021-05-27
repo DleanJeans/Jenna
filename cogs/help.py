@@ -114,7 +114,7 @@ class EmbedHelpCommand(commands.HelpCommand):
         if full:
             await React.add_buttons(msg, COG_EMOTES.values(), self.jump_help, self.context.author)
             await React.add_button(msg, GLOBE, self.jump_help, self.context.author)
-        await React.add_delete_button(msg, user=self.context.author)
+        await React.add_delete_button(msg, self.context.author)
 
     async def jump_help(self, reaction, user):
         emoji = reaction.emoji if type(reaction.emoji) is str else reaction.emoji.name
