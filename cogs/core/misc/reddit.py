@@ -207,6 +207,9 @@ JSON = '.json'
 MEDIA_URL = 'url_overridden_by_dest'
 REDDIT_COM = 'https://www.reddit.com/'
 REDDIT_GALLERY = REDDIT_COM + 'gallery/'
+MEDIA_METADATA = 'media_metadata'
+CROSSPOST_PARENT_LIST = 'crosspost_parent_list'
+MAX_URLS_SHOWN = 3
 
 async def detect_post_url_to_send_media_url(context):
     msg = context.message
@@ -216,6 +219,9 @@ async def send_media_url_for_post_url(context, url):
     post_ids = re.findall(REDDIT_POST_REGEX, url)
     media_urls = await get_media_urls_from_post_ids(post_ids)
     if media_urls:
+        if len(media_urls) > MAX_URLS_SHOWN:
+            omitted_urls = len(media_urls) - MAX_URLS_SHOWN
+            media_urls = media_urls[:MAX_URLS_SHOWN] + [f'+ {omitted_urls} more']
         await context.send('\n'.join(media_urls))
 
 async def get_media_urls_from_post_ids(post_ids):
@@ -240,10 +246,11 @@ async def get_media_urls_from_post_ids(post_ids):
                 media_url = await savemp4_red(post_url)
         
         if REDDIT_GALLERY in media_url:
-            media_metadata = post_data['media_metadata']
-            for id, data in media_metadata.items():
+            media_metadata = post_data[MEDIA_METADATA] if MEDIA_METADATA in post_data \
+                else post_data[CROSSPOST_PARENT_LIST][0][MEDIA_METADATA]
+            for i, (id, data) in enumerate(media_metadata.items()):
                 image_data = data['s']
-                media_urls.append(image_data['u'].replace('&amp;', '&'))
+                media_urls.append(f'{i+1}: ' + image_data['u'].replace('&amp;', '&'))
         else:
             media_urls.append(media_url)
     
