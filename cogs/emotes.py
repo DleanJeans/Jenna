@@ -32,7 +32,7 @@ class Emotes(commands.Cog):
         self.external_emojis = self.Persist.get(EXTERNAL_EMOJIS, {})
         self.Persist.set(EXTERNAL_EMOJIS, self.external_emojis)
 
-    @commands.command(aliases=['s'])
+    @commands.command(aliases=['sp'])
     async def spell(self, ctx, *, text):
         await spell(ctx, text)
     

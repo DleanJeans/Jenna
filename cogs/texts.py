@@ -97,7 +97,7 @@ class Texts(commands.Cog):
         response = 'Google Dictionary supported languages:\n' + languages
         await ctx.send(response)
     
-    @commands.command()
+    @commands.command(aliases=['s'])
     async def say(self, ctx, *, text):
         Emotes = self.bot.get_cog('Emotes')
 
