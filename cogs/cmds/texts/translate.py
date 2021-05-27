@@ -50,7 +50,7 @@ def try_parse_src2dest(s):
     except:
         return '>'
 
-async def translate(context, src2dest, text):
+async def translate(ctx, src2dest, text):
     global translator
     text = text or NO_TEXT
 
@@ -66,7 +66,7 @@ async def translate(context, src2dest, text):
     
     for lang in src2dest + suffix_src2dest:
         if lang and lang not in SUPPORTED_LANGS:
-            raise commands.BadArgument(INVALID_LANG_CODE.format(lang, context.prefix))
+            raise commands.BadArgument(INVALID_LANG_CODE.format(lang, ctx.prefix))
     src, dest = src2dest
     src = suffix_src2dest[0] or src
     dest = suffix_src2dest[1] or dest
@@ -97,8 +97,8 @@ async def translate(context, src2dest, text):
 
     return translated
 
-async def embed_translate(context, src2dest, text):
-    translated = await translate(context, src2dest, text)
+async def embed_translate(ctx, src2dest, text):
+    translated = await translate(ctx, src2dest, text)
 
     translate_url = TRANSLATE_URL.format(translated.src, translated.dest, quote(text))
     embed = colors.embed(title=GOOGLE_TRANSLATE, url=translate_url, description=translated.text, color=0x4a88ed)

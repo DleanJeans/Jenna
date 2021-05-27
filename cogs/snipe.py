@@ -42,31 +42,31 @@ class Snipe(commands.Cog):
     
     @commands.command(hidden=True, aliases=['re'])
     @commands.guild_only()
-    async def repeatedit(self, context, channel:typing.Optional[discord.TextChannel], i=1):
-        channel = channel or context.channel
+    async def repeatedit(self, ctx, channel:typing.Optional[discord.TextChannel], i=1):
+        channel = channel or ctx.channel
         msg = self.get_last_message(channel, EDITED, i)
         if msg:
-            await context.send(msg.content, embed=msg.embeds[0] if msg.embeds else None)
+            await ctx.send(msg.content, embed=msg.embeds[0] if msg.embeds else None)
         else:
-            await context.send(embed=self.create_empty_embed(channel, EDITED))
+            await ctx.send(embed=self.create_empty_embed(channel, EDITED))
     
     @commands.group(aliases=['unkolsh'])
     @commands.guild_only()
-    async def snipe(self, context, channel:typing.Optional[discord.TextChannel], i:typing.Union[int, str]=1):
+    async def snipe(self, ctx, channel:typing.Optional[discord.TextChannel], i:typing.Union[int, str]=1):
         if type(i) == str:
-            await self.send_log_in_embed(context, channel or context.channel, DELETED)
+            await self.send_log_in_embed(ctx, channel or ctx.channel, DELETED)
             return
         elif i > 10:
             raise commands.BadArgument('You can only snipe the last 10 deleted messages!')
-        await self.send_message_in_embed(context, channel, DELETED, i)
+        await self.send_message_in_embed(ctx, channel, DELETED, i)
 
     @commands.command(aliases=['editsnipe'])
     @commands.guild_only()
-    async def snipedit(self, context, channel:typing.Optional[discord.TextChannel], i=1):
-        await self.send_message_in_embed(context, channel, EDITED, i)
+    async def snipedit(self, ctx, channel:typing.Optional[discord.TextChannel], i=1):
+        await self.send_message_in_embed(ctx, channel, EDITED, i)
 
-    async def send_message_in_embed(self, context, channel, state, index):
-        channel = channel or context.channel
+    async def send_message_in_embed(self, ctx, channel, state, index):
+        channel = channel or ctx.channel
         msg = self.get_last_message(channel, state, index)
 
         embed = self.create_empty_embed(channel, state)
@@ -75,9 +75,9 @@ class Snipe(commands.Cog):
             await self.embed_message_log(embed, msg, state)
             files = await self.get_backup_files(msg, embed)
 
-        await context.send(embed=embed, files=files)
+        await ctx.send(embed=embed, files=files)
         if msg and msg.embeds:
-            await context.send(embed=msg.embeds[0])
+            await ctx.send(embed=msg.embeds[0])
     
     def get_last_message(self, channel, state, index):
         log = self.channel_logs.get(channel.id)
@@ -117,20 +117,20 @@ class Snipe(commands.Cog):
     
     @commands.command()
     @commands.guild_only()
-    async def snipelog(self, context, channel:discord.TextChannel=None):
-        await self.send_log_in_embed(context, channel or context.channel, DELETED)
+    async def snipelog(self, ctx, channel:discord.TextChannel=None):
+        await self.send_log_in_embed(ctx, channel or ctx.channel, DELETED)
     
     @commands.command()
     @commands.guild_only()
-    async def editlog(self, context, channel:discord.TextChannel=None):
-        await self.send_log_in_embed(context, channel or context.channel, EDITED)
+    async def editlog(self, ctx, channel:discord.TextChannel=None):
+        await self.send_log_in_embed(ctx, channel or ctx.channel, EDITED)
     
-    async def send_log_in_embed(self, context, channel, state):
+    async def send_log_in_embed(self, ctx, channel, state):
         log = self.channel_logs.get(channel.id)
         embed = self.create_empty_embed(channel, state)
         self.embed_channel_logs(embed, log, state)
 
-        await context.send(embed=embed)
+        await ctx.send(embed=embed)
 
     def embed_channel_logs(self, embed, channel_log, state):
         if not channel_log: return

@@ -49,10 +49,10 @@ def get_ref_message_text_if_no_text(message, text=''):
         text = ref.content
     return text, ref
 
-async def get_last_message_text_if_no_text(context, text=''):
+async def get_last_message_text_if_no_text(ctx, text=''):
     last_message = None
     if not text:
-        last_message = await context.history(limit=1, before=context.message).flatten()
+        last_message = await ctx.history(limit=1, before=ctx.message).flatten()
         last_message = last_message[0]
         text = last_message.content
     return text, last_message

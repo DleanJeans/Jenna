@@ -67,8 +67,8 @@ class React(commands.Cog):
         reactable.add_button(emoji, callback)
     
     async def add_reaction(self, message, emoji):
-        context = await self.bot.get_context(message)
-        emoji = await converter.emoji(context, emoji)
+        ctx = await self.bot.get_context(message)
+        emoji = await converter.emoji(ctx, emoji)
         await message.add_reaction(emoji)
         return emoji
 

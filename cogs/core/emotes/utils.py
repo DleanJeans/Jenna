@@ -3,9 +3,9 @@ from ..utils import *
 import re
 import discord
 
-async def to_partial_emoji(context, s):
+async def to_partial_emoji(ctx, s):
     try:
-        return await commands.PartialEmojiConverter().convert(context, s)
+        return await commands.PartialEmojiConverter().convert(ctx, s)
     except:
         print(s)
 

@@ -24,23 +24,23 @@ class Games(commands.Cog):
     
     @commands.command()
     @commands.guild_only()
-    async def rps(self, context, friend:conv.FuzzyMember, rounds:int=2, sets:int=1):
+    async def rps(self, ctx, friend:conv.FuzzyMember, rounds:int=2, sets:int=1):
         cannot_play = ''
-        if context.author == friend:
+        if ctx.author == friend:
             cannot_play = 'You can\'t play with yourself ya know.'
         elif any(friend in game.players for game in self.games):
             cannot_play = f'**{friend.display_name}** is in the middle of another game. Ask them later!'
-        elif any(context.author in game.players for game in self.games):
+        elif any(ctx.author in game.players for game in self.games):
             cannot_play = f'Finish your ongoing game first!'
         
         if cannot_play:
-            await context.send(cannot_play)
+            await ctx.send(cannot_play)
             return
         
         rounds = max(1, rounds)
         ets = max(1, sets)
 
-        players = [context.author, friend]
+        players = [ctx.author, friend]
         game = RPSGame(self.bot, players, sets, rounds)
         announcer = RPSAnnouncer(game)
         self.games += [game]
@@ -83,7 +83,7 @@ class Games(commands.Cog):
                 await p.send(end_result)
         
         summary = '\n'.join(summary)
-        await context.send(summary)
+        await ctx.send(summary)
 
         self.games.remove(game)
     

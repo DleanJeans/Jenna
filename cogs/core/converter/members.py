@@ -24,9 +24,9 @@ ROLE_SCORE_WEIGHT = 0.05
 MATCH_RETURNS = 10
 WHOLE_WORD_POINTS = 0.25
 
-def find_member(context, input_name, matching=DEFAULT_MATCHING, contains_all_only=True):
+def find_member(ctx, input_name, matching=DEFAULT_MATCHING, contains_all_only=True):
     input_name = input_name.lower()
-    members = context.guild.members
+    members = ctx.guild.members
     members = [m for m in members if input_in_possible_names(m, input_name)]
     
     members_by_name = {}
@@ -41,7 +41,7 @@ def find_member(context, input_name, matching=DEFAULT_MATCHING, contains_all_onl
         include_score = WHOLE_WORD_POINTS if input_name in member_name or member_name in input_name else 0
 
         member = members_by_name[member_name]
-        role_score = score_member_role(context.guild, member)
+        role_score = score_member_role(ctx.guild, member)
         weighted_role_score = role_score * ROLE_SCORE_WEIGHT
         total_score = similarity + weighted_role_score + include_score
 

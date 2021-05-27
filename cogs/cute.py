@@ -77,8 +77,8 @@ class Cute(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, msg):
         if env.TESTING or msg.author == self.bot.user: return
-        context = await self.bot.get_context(msg)
-        if context.command:
+        ctx = await self.bot.get_context(msg)
+        if ctx.command:
             return
         if self.mentioned_in(msg):
             await self.drop_emojis(msg)

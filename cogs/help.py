@@ -61,9 +61,9 @@ class EmbedHelpCommand(commands.HelpCommand):
         return signature.strip()
     
     def create_embed(self):
-        bot = self.context.bot
+        bot = self.ctx.bot
         bot_user = bot.user
-        requesting_user = self.context.message.author
+        requesting_user = self.ctx.message.author
         embed = colors.embed(title=TITLE_FORMAT % bot_user.name)
         embed.set_footer(text=FOOTER.format(requesting_user.name), icon_url=requesting_user.avatar_url)
         return embed
@@ -74,7 +74,7 @@ class EmbedHelpCommand(commands.HelpCommand):
         await self.add_buttons(msg)
     
     async def get_bot_help(self):
-        bot = self.context.bot
+        bot = self.ctx.bot
         embed = self.create_embed()
         done = []
         cog_to_commands = {}
@@ -102,7 +102,7 @@ class EmbedHelpCommand(commands.HelpCommand):
     async def get_cog_emoted_name(self, cog):
         cog = cog or DEFAULT_COG
         cog_name = cog if type(cog) is str else cog.qualified_name
-        emote = await conv.emoji(self.context, COG_EMOTES[cog_name])
+        emote = await conv.emoji(self.ctx, COG_EMOTES[cog_name])
         full_name = f'{emote} {cog_name}'
         return full_name
 
@@ -110,11 +110,11 @@ class EmbedHelpCommand(commands.HelpCommand):
         await self.add_buttons(msg, full=False)
 
     async def add_buttons(self, msg, full=True):
-        React = self.context.bot.get_cog(cogs.REACT)
+        React = self.ctx.bot.get_cog(cogs.REACT)
         if full:
-            await React.add_buttons(msg, COG_EMOTES.values(), self.jump_help, self.context.author)
-            await React.add_button(msg, GLOBE, self.jump_help, self.context.author)
-        await React.add_delete_button(msg, self.context.author)
+            await React.add_buttons(msg, COG_EMOTES.values(), self.jump_help, self.ctx.author)
+            await React.add_button(msg, GLOBE, self.jump_help, self.ctx.author)
+        await React.add_delete_button(msg, self.ctx.author)
 
     async def jump_help(self, reaction, user):
         emoji = reaction.emoji if type(reaction.emoji) is str else reaction.emoji.name
@@ -122,7 +122,7 @@ class EmbedHelpCommand(commands.HelpCommand):
             embed = await self.get_bot_help()
         else:
             cog = COG_FROM_EMOTES[emoji]
-            cog = self.context.bot.get_cog(cog)
+            cog = self.ctx.bot.get_cog(cog)
             embed = await self.get_cog_help(cog)
         
         message = reaction.message
@@ -192,16 +192,16 @@ class Help(commands.Cog):
         bot.help_command = EmbedHelpCommand()
     
     @commands.Cog.listener()
-    async def on_command_error(self, context, error):
+    async def on_command_error(self, ctx, error):
         if isinstance(error, commands.UserInputError):
             error.args = (error.args[0].replace('"', '`'),)
             if type(error) is commands.MissingRequiredArgument:
-                await context.send(f'Missing `{error.param.name}`!')
-                await context.send_help(context.command)
+                await ctx.send(f'Missing `{error.param.name}`!')
+                await ctx.send_help(ctx.command)
             else:
-                await context.send(error)
+                await ctx.send(error)
         elif hasattr(error, 'original') and type(error.original) is discord.errors.Forbidden:
-            await context.author.send("I don't have the permissions to send it there!")
+            await ctx.author.send("I don't have the permissions to send it there!")
         else:
             original = error.original if hasattr(error, 'original') else error
             exception = traceback.format_exception(type(original), original, original.__traceback__)
@@ -209,7 +209,7 @@ class Help(commands.Cog):
             print(exception)
             if isinstance(error, ignored_errors): return
 
-            msg = context.message
+            msg = ctx.message
             source = ''.join([
                 f'by {msg.author.mention} ({msg.author.display_name})\n',
                 f'in {msg.channel.mention} of `{msg.guild}`\n' if not isinstance(msg.channel, discord.DMChannel) else '',
@@ -219,7 +219,7 @@ class Help(commands.Cog):
             error_text = getattr(error.original, 'text', None) if hasattr(error, 'original') else error
             if error_text:
                 user_embed = colors.embed_error(title='Error', description=error_text)
-                await context.send(embed=user_embed)
+                await ctx.send(embed=user_embed)
             await self.bot.owner.send(f'```{exception}```', embed=author_embed)
 
 ignored_errors = (commands.CommandNotFound,)

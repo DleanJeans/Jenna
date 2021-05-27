@@ -172,7 +172,7 @@ def get_entry_in_rss(rss, index=0, sorting=TOP):
         entry.sub_logo = sub_logo.text
     return entry
 
-async def send_posts_in_embeds(context, sub, sorting, posts, period):
+async def send_posts_in_embeds(ctx, sub, sorting, posts, period):
     if not isinstance(posts, range):
         posts = parse_posts(posts)
     if sorting is not TOP:
@@ -193,12 +193,12 @@ async def send_posts_in_embeds(context, sub, sorting, posts, period):
             embed.add_field(name='More Title', value=post.titles[1])
         if post.content_url:
             embed.add_field(name='Link', value=post.content_url_field)
-        msg = await context.send(embed=embed)
+        msg = await ctx.send(embed=embed)
 
         if is_special_website(post.content_url):
-            await context.send(post.content_url)
+            await ctx.send(post.content_url)
         elif VREDDIT in post.content_url or REDDIT_GALLERY in post.content_url:
-            await send_media_url_for_post_url(context, post.url)
+            await send_media_url_for_post_url(ctx, post.url)
 
 
 REDDIT_POST_REGEX = r'(?:\w+\.)?(?:reddit\.com(?:/r/\w+/comments)?|redd\.it)/(\w+)'
@@ -211,18 +211,18 @@ MEDIA_METADATA = 'media_metadata'
 CROSSPOST_PARENT_LIST = 'crosspost_parent_list'
 MAX_URLS_SHOWN = 3
 
-async def detect_post_url_to_send_media_url(context):
-    msg = context.message
-    await send_media_url_for_post_url(context, msg.content)
+async def detect_post_url_to_send_media_url(ctx):
+    msg = ctx.message
+    await send_media_url_for_post_url(ctx, msg.content)
 
-async def send_media_url_for_post_url(context, url):
+async def send_media_url_for_post_url(ctx, url):
     post_ids = re.findall(REDDIT_POST_REGEX, url)
     media_urls = await get_media_urls_from_post_ids(post_ids)
     if media_urls:
         if len(media_urls) > MAX_URLS_SHOWN:
             omitted_urls = len(media_urls) - MAX_URLS_SHOWN
             media_urls = media_urls[:MAX_URLS_SHOWN] + [f'+ {omitted_urls} more']
-        await context.send('\n'.join(media_urls))
+        await ctx.send('\n'.join(media_urls))
 
 async def get_media_urls_from_post_ids(post_ids):
     media_urls = []

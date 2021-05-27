@@ -23,11 +23,11 @@ class EmojiPaginator:
     def __init__(self, Emotes):
         self.Emotes = Emotes
         self.pages = []
-        self.context = None
+        self.ctx = None
         self.last_emoji_count = 0
     
-    async def get_page(self, context, page=1):
-        self.context = context
+    async def get_page(self, ctx, page=1):
+        self.ctx = ctx
 
         emoji_count = len(self.Emotes.external_emojis)
         if emoji_count != self.last_emoji_count:
@@ -82,5 +82,5 @@ class EmojiPaginator:
         return pages
 
     async def get_linked_name(self, emoji):
-        emoji = await utils.to_partial_emoji(self.context, emoji)
+        emoji = await utils.to_partial_emoji(self.ctx, emoji)
         return f'[{emoji.name}]({emoji.url})'

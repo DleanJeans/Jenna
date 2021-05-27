@@ -46,10 +46,10 @@ async def reactspell(message, text):
 def convert_to_emotes_for_react(text):
     return convert_to_emotes(text)
 
-async def spell(context, text):
+async def spell(ctx, text):
     emotes = convert_to_emotes(text)
     response = ' '.join(emotes)
-    await context.send(response)
+    await ctx.send(response)
 
 def convert_to_emotes_for_message(text):
     text = replace_text_with_alternative_emojis(text)

@@ -33,25 +33,25 @@ class Emotes(commands.Cog):
         self.Persist.set(EXTERNAL_EMOJIS, self.external_emojis)
 
     @commands.command(aliases=['s'])
-    async def spell(self, context, *, text):
-        await spell(context, text)
+    async def spell(self, ctx, *, text):
+        await spell(ctx, text)
     
     @commands.command(aliases=['rs'])
-    async def reactspell(self, context, channel:Optional[discord.TextChannel], i:Optional[int]=1, *, text):
-        ref_message = utils.get_referenced_message(context.message)
-        message_to_react = ref_message or await self.count_message(context, None, channel, i)
+    async def reactspell(self, ctx, channel:Optional[discord.TextChannel], i:Optional[int]=1, *, text):
+        ref_message = utils.get_referenced_message(ctx.message)
+        message_to_react = ref_message or await self.count_message(ctx, None, channel, i)
         await reactspell(message_to_react, text)
-        await utils.emotes.react_tick(context.message)
+        await utils.emotes.react_tick(ctx.message)
 
     @commands.group(aliases=['emoji'], hidden=True)
-    async def emote(self, context): pass
+    async def emote(self, ctx): pass
 
     @commands.command(aliases=['big', 'jumbo'])
-    async def enlarge(self, context, emoji:Optional[conv.NitroEmoji]):
-        await context.trigger_typing()
-        emoji = await self.get_emote_from_reference_or_last_message(context, emoji)
+    async def enlarge(self, ctx, emoji:Optional[conv.NitroEmoji]):
+        await ctx.trigger_typing()
+        emoji = await self.get_emote_from_reference_or_last_message(ctx, emoji)
         if type(emoji) is not discord.Emoji:
-            emoji = await self.get_external_emoji(context, emoji) or emoji
+            emoji = await self.get_external_emoji(ctx, emoji) or emoji
         url, single_url = utils.emotes.get_url(emoji)
         if isinstance(emoji, str) and emoji[0].isalpha():
             url = ''
@@ -59,17 +59,17 @@ class Emotes(commands.Cog):
             url = single_url
         
         if url:
-            await context.send(url)
+            await ctx.send(url)
         else:
-            await context.message.add_reaction('⁉️')
+            await ctx.message.add_reaction('⁉️')
     
-    async def get_emote_from_reference_or_last_message(self, context, emoji):
+    async def get_emote_from_reference_or_last_message(self, ctx, emoji):
         if not emoji:
-            text, _ = utils.get_ref_message_text_if_no_text(context.message, emoji)
+            text, _ = utils.get_ref_message_text_if_no_text(ctx.message, emoji)
             emojis = re.findall(EMOJI_NAME_REGEX, text or '')
 
             if not emojis:
-                text, _ = await utils.get_last_message_text_if_no_text(context, emojis)
+                text, _ = await utils.get_last_message_text_if_no_text(ctx, emojis)
                 emojis = re.findall(EMOJI_NAME_REGEX, text or '')
 
             if emojis:
@@ -78,17 +78,17 @@ class Emotes(commands.Cog):
                 raise commands.BadArgument('No emoji to zoom in!')
         return emoji
         
-    async def get_external_emoji(self, context, name, add=False):
+    async def get_external_emoji(self, ctx, name, add=False):
         id = self.external_emojis.get(name)
         if not id: return
         emoji = utils.emotes.expand(name, id)
-        emoji = await utils.emotes.to_partial_emoji(context, emoji)
+        emoji = await utils.emotes.to_partial_emoji(ctx, emoji)
         if emoji and add:
             emoji = await self.add_emoji(emoji)
         return emoji
 
     @commands.command(aliases=['emojis'])
-    async def emotes(self, context, page:int=1):
+    async def emotes(self, ctx, page:int=1):
         home_guild = self.bot.get_guild(HOME_GUILD)
         embed = colors.embed()
         embed.set_author(name='Available Emotes')
@@ -103,22 +103,22 @@ class Emotes(commands.Cog):
         for e in page_emojis:
             emojis += [f'{e} `:{e.name}:`']
         embed.description = '\n'.join(emojis)
-        await context.send(embed=embed)
+        await ctx.send(embed=embed)
     
     @commands.command(aliases=['nitrojis'])
-    async def nitrotes(self, context, page=1):
-        await context.trigger_typing()
-        embed = await self.external_paginator.get_page(context, page)
-        await context.send(embed=embed)
+    async def nitrotes(self, ctx, page=1):
+        await ctx.trigger_typing()
+        embed = await self.external_paginator.get_page(ctx, page)
+        await ctx.send(embed=embed)
 
-    async def count_message(self, context, author, channel, i):
-        channel = channel or context.channel
+    async def count_message(self, ctx, author, channel, i):
+        channel = channel or ctx.channel
         counter = 1
         if type(author) == int:
             i = author
             author = None
 
-        async for message in channel.history(limit=None, before=context.message):
+        async for message in channel.history(limit=None, before=ctx.message):
             if author and message.author != author:
                 continue
             if counter < i:
@@ -128,20 +128,20 @@ class Emotes(commands.Cog):
         return message
 
     @commands.command()
-    async def drop(self, context, emoji:conv.NitroEmoji, author:Optional[Union[int, conv.FuzzyMember]], channel:Optional[discord.TextChannel], i:int=1):
-        ref_message = utils.get_referenced_message(context.message)
-        message = ref_message or await self.count_message(context, author, channel, i)
+    async def drop(self, ctx, emoji:conv.NitroEmoji, author:Optional[Union[int, conv.FuzzyMember]], channel:Optional[discord.TextChannel], i:int=1):
+        ref_message = utils.get_referenced_message(ctx.message)
+        message = ref_message or await self.count_message(ctx, author, channel, i)
         
         external = None
         if isinstance(emoji, str):
-            emoji = await self.get_external_emoji(context, emoji, add=True)
+            emoji = await self.get_external_emoji(ctx, emoji, add=True)
             external = emoji
         
         try:
             await message.add_reaction(emoji)
-            await utils.emotes.react_tick(context.message)
+            await utils.emotes.react_tick(ctx.message)
         except:
-            await context.message.add_reaction('⁉️')
+            await ctx.message.add_reaction('⁉️')
         
         if external:
             await external.delete()
@@ -152,17 +152,17 @@ class Emotes(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, msg):
         if msg.author.bot: return
-        context = await self.bot.get_context(msg)
-        if context.command:
+        ctx = await self.bot.get_context(msg)
+        if ctx.command:
             return
         await self.cache_external_emojis(msg)
         
-        if await utils.is_user_on_local(context):
+        if await utils.is_user_on_local(ctx):
             return
         await self.reply_emojis(msg)
 
     async def reply_emojis(self, msg):
-        context = await self.bot.get_context(msg)
+        ctx = await self.bot.get_context(msg)
         matches = []
         for line in msg.content.splitlines():
             if not line.startswith(START_QUOTE):
@@ -175,7 +175,7 @@ class Emotes(commands.Cog):
             name = emoji.replace(':', '')
             emoji = conv.get_known_emoji(self.bot.emojis, name, msg.author)
             if not emoji:
-                emoji = await self.get_external_emoji(context, name, add=True)
+                emoji = await self.get_external_emoji(ctx, name, add=True)
                 if not emoji: continue
                 externals += [emoji]
             
@@ -184,7 +184,7 @@ class Emotes(commands.Cog):
         
         if emojis:
             emojis = ''.join(emojis)
-            await webhook.try_send(self, context, emojis)
+            await webhook.try_send(self, ctx, emojis)
         
         for e in externals:
             await e.delete()
@@ -196,14 +196,14 @@ class Emotes(commands.Cog):
             self.external_emojis[emoji.name] = str(emoji)
 
     async def cache_external_emojis(self, msg):
-        context = await self.bot.get_context(msg)
+        ctx = await self.bot.get_context(msg)
         emojis = re.findall(REAL_EMOJI_PATTERN, msg.content)
         emojis += [r.emoji for r in msg.reactions if isinstance(r.emoji, discord.PartialEmoji)]
         
         new_emotes = False
 
         for e in emojis:
-            partial = await utils.emotes.to_partial_emoji(context, e) if isinstance(e, str) else e
+            partial = await utils.emotes.to_partial_emoji(ctx, e) if isinstance(e, str) else e
             known = conv.get_known_emoji(self.bot.emojis, partial.name)
             if not known:
                 id = utils.emotes.shorten(e)
@@ -215,24 +215,24 @@ class Emotes(commands.Cog):
 
     @emote.command()
     @commands.is_owner()
-    async def cache(self, context, message:discord.Message):
+    async def cache(self, ctx, message:discord.Message):
         before = self.external_emojis.copy()
         await self.cache_external_emojis(message)
         changes = []
         if self.external_emojis != before:
             before, after = map(set, [before.items(), self.external_emojis.items()])
             changes = after - before
-        await context.send(f'Found `{len(changes)}` new emotes!')
+        await ctx.send(f'Found `{len(changes)}` new emotes!')
 
     @emote.command()
     @commands.is_owner()
-    async def scan(self, context, channel:typing.Union[discord.TextChannel, int]=None, limit:int=100):
+    async def scan(self, ctx, channel:typing.Union[discord.TextChannel, int]=None, limit:int=100):
         if isinstance(channel, int):
             channel = self.bot.get_channel(channel)
-        channel = channel or context.channel
+        channel = channel or ctx.channel
         count_before = len(self.external_emojis)
 
-        async with context.typing():
+        async with ctx.typing():
             async for message in channel.history(limit=limit):
                 contains_emojis = re.findall(REAL_EMOJI_PATTERN, message.content)
                 if contains_emojis:
@@ -240,21 +240,21 @@ class Emotes(commands.Cog):
         
         count_after = len(self.external_emojis)
         change = count_after - count_before
-        await context.send(f'✅ Found `{change}` new emotes!')
+        await ctx.send(f'✅ Found `{change}` new emotes!')
 
     @emote.command()
     @commands.has_guild_permissions(manage_emojis=True)
     @commands.bot_has_guild_permissions(manage_emojis=True)
-    async def add(self, context, url, name=None):
+    async def add(self, ctx, url, name=None):
         response = '⁉️'
-        async with context.typing():
+        async with ctx.typing():
             image = await download_image(url)
             if image:
                 if not name:
                     name = 'emoji%04d' % random.randint(0, 9999)
-                await context.guild.create_custom_emoji(name=name, image=image)
-                response = conv.get_known_emoji(self.bot.emojis, name, context.author)
-            await context.message.add_reaction(response)
+                await ctx.guild.create_custom_emoji(name=name, image=image)
+                response = conv.get_known_emoji(self.bot.emojis, name, ctx.author)
+            await ctx.message.add_reaction(response)
 
 async def download_image(url):
     async with aiohttp.ClientSession() as session:

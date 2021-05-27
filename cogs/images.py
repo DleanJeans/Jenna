@@ -16,21 +16,21 @@ class Images(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=['ava', 'pfp'])
-    async def avatar(self, context, *, member:conv.FuzzyMember=None):
-        member = member or context.author
+    async def avatar(self, ctx, *, member:conv.FuzzyMember=None):
+        member = member or ctx.author
         embed = colors.embed(description=member.mention)
         embed.title = str(member)
         embed.set_image(url=str(member.avatar_url).replace('webp', 'png'))
         embed.timestamp = datetime.now().astimezone()
-        await context.send(embed=embed)
+        await ctx.send(embed=embed)
     
     @commands.command(aliases=['quote'])
-    async def inspiro(self, context):
-        await context.trigger_typing()
+    async def inspiro(self, ctx):
+        await ctx.trigger_typing()
         embed = colors.embed(title='InspiroBot', url=INSPIROBOT_URL)
         quote_image = await get_inspiro_quote()
         embed.set_image(url=quote_image)
-        await context.send(embed=embed)
+        await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Images(bot))

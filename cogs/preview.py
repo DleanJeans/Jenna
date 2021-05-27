@@ -13,12 +13,12 @@ class Preview(commands.Cog):
     
     @commands.Cog.listener()
     async def on_message(self, message):
-        context = await self.bot.get_context(message)
-        if not message.guild or message.author == self.bot.user or context.command: return
+        ctx = await self.bot.get_context(message)
+        if not message.guild or message.author == self.bot.user or ctx.command: return
 
         urls = re.findall(JUMP_URL_PATTERN, message.content)
         for jump_url in urls:
-            quoted_message = await self.message_converter.convert(context, jump_url)
+            quoted_message = await self.message_converter.convert(ctx, jump_url)
             author = quoted_message.author
 
             author_text = f'{author.display_name} #{quoted_message.channel}'
@@ -30,9 +30,9 @@ class Preview(commands.Cog):
             for a in quoted_message.attachments:
                 embed.set_image(url=a.url)
             
-            await context.send(embed=embed)
+            await ctx.send(embed=embed)
             if quoted_message.embeds:
-                await context.send(embed=quoted_message.embeds[0])
+                await ctx.send(embed=quoted_message.embeds[0])
 
 def setup(bot):
     bot.add_cog(Preview(bot))
