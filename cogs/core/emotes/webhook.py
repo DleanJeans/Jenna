@@ -47,6 +47,7 @@ async def try_send(self, ctx, emojis):
                 await webhook_msg.delete()
                 self.guild_blacklist.append(ctx.guild)
                 send_as_self = True
+            await webhook.delete()
     
     if send_as_self:
         await ctx.send(emojis)
