@@ -1,5 +1,6 @@
 import discord
 import typing
+import asyncio
 
 from discord.ext import commands
 from collections.abc import Iterable
@@ -37,15 +38,19 @@ class React(commands.Cog):
             await message.delete()
             self.remove_reactable(message)
         except discord.errors.Forbidden:
-            error_msg = await message.channel.send(f'I need `Manage Messages` permission to {X} delete your message.')
+            error_msg = await message.channel.send(f'I need `Manage Messages` permission to {X} delete your message.', delete_after=60)
             await self.add_delete_button(error_msg)
     
     def remove_reactable(self, message):
         if message.id in self.reactables:
             self.reactables.pop(message.id)
         
-    async def add_delete_button(self, message, users=[], emote=X):
+    async def add_delete_button(self, message, users=[], emote=X, delete_after=0):
         await self.add_button(message, emote, self.delete, users)
+        if delete_after:
+            await asyncio.sleep(delete_after)
+            await message.remove_reaction(emote, self.bot.user)
+            self.remove_reactable(message)
 
     async def add_buttons(self, message, emojis, callback, users=[]):
         try:

@@ -51,10 +51,10 @@ async def try_send(self, ctx, emojis):
     if send_as_self:
         await ctx.send(emojis)
     
+    if ask_for_manage_webhooks:
+        alert_msg = await ctx.send(WEBHOOK_FEATURE_ALERT.format(ctx.bot.command_prefix[0]), delete_after=60)
+        await self.React.add_delete_button(alert_msg)
+
     msg_emoji_free = re.sub(EMOJI_PATTERN, '', ctx.message.content).strip()
     if msg_emoji_free == '':
-        await self.React.add_delete_button(ctx.message, author)
-    
-    if ask_for_manage_webhooks:
-        alert_msg = await ctx.send(WEBHOOK_FEATURE_ALERT.format(ctx.bot.command_prefix[0]))
-        await self.React.add_delete_button(alert_msg)
+        await self.React.add_delete_button(ctx.message, author, delete_after=60)
