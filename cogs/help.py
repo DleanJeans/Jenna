@@ -61,9 +61,9 @@ class EmbedHelpCommand(commands.HelpCommand):
         return signature.strip()
     
     def create_embed(self):
-        bot = self.ctx.bot
+        bot = self.context.bot
         bot_user = bot.user
-        requesting_user = self.ctx.message.author
+        requesting_user = self.context.message.author
         embed = colors.embed(title=TITLE_FORMAT % bot_user.name)
         embed.set_footer(text=FOOTER.format(requesting_user.name), icon_url=requesting_user.avatar_url)
         return embed
@@ -74,7 +74,7 @@ class EmbedHelpCommand(commands.HelpCommand):
         await self.add_buttons(msg)
     
     async def get_bot_help(self):
-        bot = self.ctx.bot
+        bot = self.context.bot
         embed = self.create_embed()
         done = []
         cog_to_commands = {}
@@ -102,7 +102,7 @@ class EmbedHelpCommand(commands.HelpCommand):
     async def get_cog_emoted_name(self, cog):
         cog = cog or DEFAULT_COG
         cog_name = cog if type(cog) is str else cog.qualified_name
-        emote = await conv.emoji(self.ctx, COG_EMOTES[cog_name])
+        emote = await conv.emoji(self.context, COG_EMOTES[cog_name])
         full_name = f'{emote} {cog_name}'
         return full_name
 
@@ -110,11 +110,11 @@ class EmbedHelpCommand(commands.HelpCommand):
         await self.add_buttons(msg, full=False)
 
     async def add_buttons(self, msg, full=True):
-        React = self.ctx.bot.get_cog(cogs.REACT)
+        React = self.context.bot.get_cog(cogs.REACT)
         if full:
-            await React.add_buttons(msg, COG_EMOTES.values(), self.jump_help, self.ctx.author)
-            await React.add_button(msg, GLOBE, self.jump_help, self.ctx.author)
-        await React.add_delete_button(msg, self.ctx.author)
+            await React.add_buttons(msg, COG_EMOTES.values(), self.jump_help, self.context.author)
+            await React.add_button(msg, GLOBE, self.jump_help, self.context.author)
+        await React.add_delete_button(msg, self.context.author)
 
     async def jump_help(self, reaction, user):
         emoji = reaction.emoji if type(reaction.emoji) is str else reaction.emoji.name
@@ -122,7 +122,7 @@ class EmbedHelpCommand(commands.HelpCommand):
             embed = await self.get_bot_help()
         else:
             cog = COG_FROM_EMOTES[emoji]
-            cog = self.ctx.bot.get_cog(cog)
+            cog = self.context.bot.get_cog(cog)
             embed = await self.get_cog_help(cog)
         
         message = reaction.message
