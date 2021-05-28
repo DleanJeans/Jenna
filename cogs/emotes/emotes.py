@@ -48,12 +48,15 @@ class Emotes(commands.Cog):
 
     @commands.command(aliases=['big', 'jumbo'])
     async def enlarge(self, ctx, emoji:Optional[conv.NitroEmoji]):
+        def is_discord_emoji(emoji):
+            return type(emoji) in [discord.Emoji, discord.PartialEmoji]
+
         await ctx.trigger_typing()
         emoji = await self.get_emote_from_reference_or_last_message(ctx, emoji)
-        if type(emoji) not in [discord.Emoji, discord.PartialEmoji]:
-            emoji = conv.get_known_emoji(ctx.bot.emojis, emoji)
-            if not emoji:
-                emoji = await self.get_external_emoji(ctx, emoji) or emoji
+        if not is_discord_emoji(emoji):
+            emoji = conv.get_known_emoji(ctx.bot.emojis, emoji) or emoji
+        if not is_discord_emoji(emoji):
+            emoji = await self.get_external_emoji(ctx, emoji) or emoji
         url, single_url = utils.emotes.get_url(emoji)
         if isinstance(emoji, str) and emoji[0].isalpha():
             url = ''
@@ -68,14 +71,14 @@ class Emotes(commands.Cog):
     async def get_emote_from_reference_or_last_message(self, ctx, emoji):
         if not emoji:
             text, _ = utils.get_ref_message_text_if_no_text(ctx.message, emoji)
-            emojis = re.findall(EMOJI_NAME_REGEX, text or '')
+            emojis = re.findall(REAL_EMOJI_PATTERN, text or '')
 
             if not emojis:
                 text, _ = await utils.get_last_message_text_if_no_text(ctx, emojis)
-                emojis = re.findall(EMOJI_NAME_REGEX, text or '')
+                emojis = re.findall(REAL_EMOJI_PATTERN, text or '')
 
             if emojis:
-                emoji = emojis[0]
+                emoji = await commands.PartialEmojiConverter().convert(ctx, emojis[0])
             else:
                 raise commands.BadArgument('No emoji to zoom in!')
         return emoji
