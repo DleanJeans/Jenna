@@ -18,7 +18,9 @@ async def compute(ctx, expr):
     try:
         value = eval(expr)
         if value is not None:
-            value = str(value).rstrip('0').rstrip('.')
+            value = '{:,}'.format(value).replace(',', ' ')
+            if '.' in value:
+                value = str(value).rstrip('0').rstrip('.')
             response = f'**=** `{value}`'
             await ctx.send(response)
     except Exception as e:
