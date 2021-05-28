@@ -1,8 +1,5 @@
 import discord
-import os
-import colors
 import env
-import logging
 import cogs
 
 from discord.ext import commands
@@ -12,18 +9,19 @@ class Bot(commands.Bot):
         await self.is_owner(self.user)
         self.owner = self.get_user(self.owner_id)
         print('Logged in as', bot.user)
-        if env.TESTING: return
-        await self.owner.send('I\'m ready to go!')
+        await self.owner.send('Jennie is up and running' if env.TESTING else "I'm ready to go!")
 
-intents = discord.Intents.default()
-intents.members = True
+def create_bot():
+    intents = discord.Intents.default()
+    intents.members = True
+    prefixes = ['j ', 'jenna '] if not env.TESTING else ['jj ']
+    for p in prefixes[::]:
+        prefixes.append(p.capitalize())
+    return Bot(command_prefix=prefixes, case_insensitive=True, intents=intents)
 
-prefixes = ['j ', 'jenna '] if not env.TESTING else ['k ']
-for p in prefixes[::]:
-    prefixes.append(p.capitalize())
-bot = Bot(command_prefix=prefixes, case_insensitive=True, intents=intents)
 
 if __name__ == '__main__':
+    bot = create_bot()
     for cog in cogs.LIST:
         bot.load_extension(cog)
     bot.run(env.BOT_TOKEN)

@@ -4,7 +4,7 @@ import asyncio
 
 from discord.ext import commands
 from collections.abc import Iterable
-from .core import converter
+from .common import converter
 
 X = '❌'
 OK = '✅'
@@ -56,7 +56,7 @@ class React(commands.Cog):
         try:
             for e in emojis:
                 await self.add_button(message, e, callback, users)
-        except:
+        except Exception as e:
             pass # message deleted while adding
 
     async def add_button(self, message, emoji, callback, users=[]):

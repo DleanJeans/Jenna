@@ -1,16 +1,15 @@
-import discord
-import colors
-import cogs
-import traceback
-import sys
+from discord.ext.commands.errors import BadUnionArgument
 import const
-import env
+import cogs
+import discord
 import os
+import traceback
 
+from .common import colors
+from .common import converter as conv
 from discord.ext import commands
-from .core import converter as conv
 
-BRIEFS_FILE = os.path.join(os.path.dirname(__file__), 'core/help_briefs.txt')
+BRIEFS_FILE = os.path.join(os.path.dirname(__file__), 'common/help_briefs.txt')
 with open(BRIEFS_FILE, encoding='utf8') as file:
     BRIEFS = file.read().split('\n\n')
     BRIEFS = [b.split('|') for b in BRIEFS]

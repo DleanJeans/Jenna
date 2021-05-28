@@ -1,1 +1,0 @@
-from .spell import spell, reactspell

@@ -4,7 +4,7 @@ import const
 import env
 
 from discord.ext import commands
-from .core.dank.unscramble import unscramble
+from .common import unscramble
 
 DANK_MEMER = 'Dank Memer'
 

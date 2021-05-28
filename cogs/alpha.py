@@ -1,12 +1,10 @@
-import discord
-import re
-import const
 import cogs as coglist
+import discord
 import importlib
 import sys
 import traceback
-import colors
 
+from .common import colors
 from discord.ext import commands
 from typing import Optional
 

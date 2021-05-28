@@ -1,8 +1,8 @@
+import re
+
+from .common import colors
 from discord.ext import commands
 
-import discord
-import re
-import colors
 
 JUMP_URL_PATTERN = '(https://discord(?:app)?\.com/channels/\d+/\d+/\d+)'
 

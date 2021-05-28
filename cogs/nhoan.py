@@ -1,10 +1,10 @@
 import discord
 import cogs
-import colors
 
-from typing import Optional, Union
+from .common import colors
+from .common import converter as conv
 from discord.ext import commands
-from .core import converter as conv
+from typing import Optional
 
 TITLE = 'Nhoặn Counter'
 

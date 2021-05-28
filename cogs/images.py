@@ -1,10 +1,9 @@
-import discord
-import colors
-
+from .common import colors
+from .common import converter as conv
+from .common import utils
 from discord.ext import commands
 from datetime import datetime
-from .core import converter as conv
-from .core import utils
+
 
 INSPIROBOT_URL = 'http://inspirobot.me'
 INSPIROBOT_API = INSPIROBOT_URL + '/api?generate=true'
