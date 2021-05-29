@@ -10,7 +10,7 @@ from . import translate as gtranslate
 from ..common import colors
 from ..common import converter as conv
 from ..common import utils
-from ..common import unscramble
+from ..common.unscramble import unscramble
 from ..emotes.const import EMOJI_PATTERN
 from discord.ext import commands
 from typing import Optional
