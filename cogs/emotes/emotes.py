@@ -253,13 +253,16 @@ class Emotes(commands.Cog):
     async def add(self, ctx, url, name=None):
         response = '⁉️'
         async with ctx.typing():
-            image = await download_image(url)
-            if image:
-                if not name:
-                    name = 'emoji%04d' % random.randint(0, 9999)
-                await ctx.guild.create_custom_emoji(name=name, image=image)
-                response = conv.get_known_emoji(self.bot.emojis, name, ctx.author)
-            await ctx.message.add_reaction(response)
+            try:
+                image = await download_image(url)
+                if image:
+                    if not name:
+                        name = 'emoji%04d' % random.randint(0, 9999)
+                    await ctx.guild.create_custom_emoji(name=name, image=image)
+                    response = conv.get_known_emoji(self.bot.emojis, name, ctx.author)
+            except Exception as e:
+                await ctx.message.add_reaction(response)
+                await ctx.send(e)
 
 async def download_image(url):
     async with aiohttp.ClientSession() as session:
