@@ -16,6 +16,9 @@ class Images(commands.Cog):
 
     @commands.command(aliases=['ava', 'pfp'])
     async def avatar(self, ctx, *, member:conv.FuzzyMember=None):
+        if not member:
+            ref_message = utils.get_referenced_message(ctx.message)
+            member = ref_message.author
         member = member or ctx.author
         embed = colors.embed(description=member.mention)
         embed.title = str(member)

@@ -1,4 +1,6 @@
 import difflib
+import discord
+import typing
 from discord.ext import commands
 
 
@@ -10,8 +12,8 @@ class FuzzyMemberConverter(commands.MemberConverter):
     
     async def convert(self, ctx, argument):
         try:
-            member = await super().convert(ctx, argument)
-        except:
+            return await commands.MemberConverter().convert(ctx, argument)
+        except Exception as e:
             member = find_member(ctx, argument, self.matching)
             if member:
                 return member
