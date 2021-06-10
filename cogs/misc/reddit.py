@@ -212,7 +212,7 @@ MAX_URLS_SHOWN = 3
 
 async def detect_post_url_to_send_media_url(ctx):
     msg = ctx.message
-    await send_media_url_for_post_url(ctx, msg.content)
+    return await send_media_url_for_post_url(ctx, msg.content)
 
 async def send_media_url_for_post_url(ctx, url):
     post_ids = re.findall(REDDIT_POST_REGEX, url)
@@ -221,7 +221,7 @@ async def send_media_url_for_post_url(ctx, url):
         if len(media_urls) > MAX_URLS_SHOWN:
             omitted_urls = len(media_urls) - MAX_URLS_SHOWN
             media_urls = media_urls[:MAX_URLS_SHOWN] + [f'+ {omitted_urls} more']
-        await ctx.send('\n'.join(media_urls))
+        return await ctx.send('\n'.join(media_urls))
 
 async def get_media_urls_from_post_ids(post_ids):
     media_urls = []

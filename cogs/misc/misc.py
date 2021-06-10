@@ -98,7 +98,19 @@ class Misc(commands.Cog):
         ctx = await self.bot.get_context(msg)
         if await utils.is_user_on_local(ctx):
             return
-        await reddit.detect_post_url_to_send_media_url(ctx)
+        msg = await reddit.detect_post_url_to_send_media_url(ctx)
+        if not msg:
+            return
+
+        React = self.bot.get_cog('React')
+        if not React:
+            return
+
+        async def resend_msg(r, u):
+            await msg.edit(content=msg.content)
+        if not msg.embeds:
+            await React.add_button(msg, '🔁', resend_msg, delete_after=60)
+
 
 def setup(bot):
     bot.add_cog(Misc(bot))
