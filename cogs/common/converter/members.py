@@ -2,6 +2,7 @@ import difflib
 import discord
 import typing
 from discord.ext import commands
+from .emojis import get_known_emoji
 
 
 DEFAULT_MATCHING = 0.1
@@ -17,7 +18,8 @@ class FuzzyMemberConverter(commands.MemberConverter):
             member = find_member(ctx, argument, self.matching)
             if member:
                 return member
-            raise commands.errors.BadArgument(f'Who the hell is `{argument}`?')
+            confusedaf = get_known_emoji(ctx.bot.emojis, 'confusedaf')
+            raise commands.errors.BadArgument(f"Who's `{argument}`? {confusedaf}")
 
 FuzzyMember = FuzzyMemberConverter
 
