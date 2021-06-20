@@ -60,7 +60,10 @@ class React(commands.Cog):
         reactable.add_button(emoji, callback)
         if delete_after:
             await asyncio.sleep(delete_after)
-            await message.remove_reaction(emoji, self.bot.user)
+            try:
+                await message.remove_reaction(emoji, self.bot.user)
+            except discord.errors.NotFound:
+                print('Caught NotFound message when removing reaction!')
             self.remove_reactable(message)
 
     async def add_reaction(self, message, emoji):
