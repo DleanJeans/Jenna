@@ -4,8 +4,11 @@ import re
 from .const import *
 
 WEBHOOK_FEATURE_ALERT = ('**New Feature Alert**: '
-'Requires `Manage Webhooks` permission to send emotes under your name. '
-'You can still use `{}say :emote:` to send emotes under my name.')
+                         'Requires `Manage Webhooks` permission to send emotes under your name. '
+                         'You can still use `{}say :emote:` to send emotes under my name.')
+ALERT_DELETE_AFTER = 10
+DELETE_BUTTON_REMOVE_AFTER = 60
+
 
 async def get_webhook(ctx):
     channel_webhooks = await ctx.channel.webhooks()
@@ -14,20 +17,22 @@ async def get_webhook(ctx):
         webhook = await ctx.channel.create_webhook(name=ctx.me.name)
     return webhook
 
+
 def initialize_guild_blacklist(self):
     try:
         self.guild_blacklist
     except AttributeError:
         self.guild_blacklist = []
 
-async def try_send(self, ctx, emojis):
+
+async def try_send(self, ctx, emojis, delete_external_emojis):
     if type(ctx.channel) is discord.DMChannel:
         await ctx.send(emojis)
         return
 
     send_as_self = False
     ask_for_manage_webhooks = False
-    
+
     author = ctx.author
     perms = ctx.channel.permissions_for(ctx.me)
     initialize_guild_blacklist(self)
@@ -35,7 +40,7 @@ async def try_send(self, ctx, emojis):
     if not perms.manage_webhooks:
         send_as_self = True
         ask_for_manage_webhooks = True
-    else:            
+    else:
         if ctx.guild in self.guild_blacklist:
             send_as_self = True
         else:
@@ -48,14 +53,16 @@ async def try_send(self, ctx, emojis):
                 self.guild_blacklist.append(ctx.guild)
                 send_as_self = True
             await webhook.delete()
-    
+
     if send_as_self:
         await ctx.send(emojis)
-    
+
+    await delete_external_emojis()
+
     if ask_for_manage_webhooks:
-        alert_msg = await ctx.send(WEBHOOK_FEATURE_ALERT.format(ctx.bot.command_prefix[0]), delete_after=60)
+        alert_msg = await ctx.send(WEBHOOK_FEATURE_ALERT.format(ctx.bot.command_prefix[0]), delete_after=ALERT_DELETE_AFTER)
         await self.React.add_delete_button(alert_msg)
 
     msg_emoji_free = re.sub(EMOJI_PATTERN, '', ctx.message.content).strip()
     if msg_emoji_free == '':
-        await self.React.add_delete_button(ctx.message, author, delete_after=60)
+        await self.React.add_delete_button(ctx.message, author, delete_after=DELETE_BUTTON_REMOVE_AFTER)

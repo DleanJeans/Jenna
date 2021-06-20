@@ -49,13 +49,10 @@ class React(commands.Cog):
         await self.add_button(message, emoji, self.delete, users, delete_after)
 
     async def add_buttons(self, message, emojis, callback, users=[]):
-        try:
             for e in emojis:
                 await self.add_button(message, e, callback, users)
-        except Exception as e:
-            pass # message deleted while adding
 
-    async def add_button(self, message, emoji, callback, users=[]):
+    async def add_button(self, message, emoji, callback, users=[], delete_after=0):
         if message.id not in self.reactables:
             self.reactables[message.id] = Reactable(message, users)
         reactable = self.reactables[message.id]

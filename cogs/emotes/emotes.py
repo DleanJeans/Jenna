@@ -160,7 +160,9 @@ class Emotes(commands.Cog):
         ctx = await self.bot.get_context(msg)
         if ctx.command:
             return
-        await self.cache_external_emojis(msg)
+        import env
+        if not env.TESTING:
+            await self.cache_external_emojis(msg)
         
         if await utils.is_user_on_local(ctx):
             return
@@ -187,12 +189,14 @@ class Emotes(commands.Cog):
             if emoji:
                 emojis += [str(emoji)]
         
+        async def delete_external_emojis():
+            for e in externals:
+                await e.delete()
+        
         if emojis:
             emojis = ''.join(emojis)
-            await webhook.try_send(self, ctx, emojis)
+            await webhook.try_send(self, ctx, emojis, delete_external_emojis)
         
-        for e in externals:
-            await e.delete()
     
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
