@@ -21,4 +21,9 @@ NAMES = [
     'misc'
 ]
 
-LIST = ['cogs.' + cog for cog in NAMES]
+
+def get_full_path(names):
+    return ['cogs.' + cog for cog in names]
+
+
+LIST = get_full_path(NAMES)
