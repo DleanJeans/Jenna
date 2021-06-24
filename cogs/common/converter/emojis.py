@@ -13,19 +13,21 @@ class NitroEmojiConverter(commands.PartialEmojiConverter):
 
 def get_known_emoji(emojis, name, user=None):
     def score_relevance(emoji):
-        in_guild = emoji.guild in user.mutual_guilds
-        total_score = in_guild * 100
-        if in_guild:
-            member = emoji.guild.get_member(user.id)
-            sum_roles = sum([r.position for r in member.roles])
-            is_owner = emoji.guild.owner == member
-            total_score += sum_roles + is_owner * 100
-        return total_score
+        try:
+            in_guild = emoji.guild in user.mutual_guilds
+            total_score = in_guild * 100
+            if in_guild:
+                member = emoji.guild.get_member(user.id)
+                sum_roles = sum([r.position for r in member.roles])
+                is_owner = emoji.guild.owner == member
+                total_score += sum_roles + is_owner * 100
+            return total_score
+        except:
+            return 0
 
-    if 'mutual_guilds' in dir(user):
-        duplicates = [e for e in emojis if e.name == name]
-        duplicates.sort(key=score_relevance, reverse=True)
-        return duplicates[0] if duplicates else None
+    duplicates = [e for e in emojis if e.name == name]
+    duplicates.sort(key=score_relevance, reverse=True)
+    return duplicates[0] if duplicates else None
     return discord.utils.get(emojis, name=name)
 
 emoji_converter = NitroEmojiConverter()
