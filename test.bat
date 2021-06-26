@@ -1,2 +1,2 @@
 @echo off
-py -m pytest tests --durations=0 %*
+py -m pytest --durations=5 %*

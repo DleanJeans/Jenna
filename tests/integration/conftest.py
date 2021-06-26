@@ -1,9 +1,9 @@
 import cogs
 import pytest
-import discord.ext.test as dpytest
 import env
 
 from bot import create_bot
+from discord.ext.test import configure, get_config, get_message, message
 
 
 @pytest.fixture(autouse=True)
@@ -12,21 +12,31 @@ def disable_env_local_flags():
     env.TESTING = False
 
 
-@pytest.fixture
-def bot(cog_list):
+@pytest.fixture(autouse=True)
+def bot(cog_list, request):
+    if 'nobot' in request.keywords:
+        return
     bot = create_bot(cogs.get_full_path(cog_list))
-    dpytest.configure(bot)
-    return bot
+    configure(bot)
 
-
-async def send_cmd(*args):
-    await dpytest.message("j " + " ".join(args))
 
 @pytest.fixture()
 def config():
-    return dpytest.get_config()
+    return get_config()
 
 
 @pytest.fixture()
 def guild(config):
     return config.guilds[0]
+
+
+async def send_cmd(*args):
+    await message('j ' + ' '.join(args))
+
+
+def verify_message(exact='', contains=''):
+    msg = get_message()
+    if exact:
+        assert msg.content == exact
+    elif contains:
+        assert exact not in msg.content
