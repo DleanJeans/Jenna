@@ -161,7 +161,9 @@ class Snipe(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, msg):
-        files = { a.filename: await a.read() for a in msg.attachments }
+        if msg.author == self.bot.user:
+            return
+        files = {a.filename: await a.read() for a in msg.attachments}
         if files:
             self.backup_files[msg.id] = files
 
