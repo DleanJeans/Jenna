@@ -3,7 +3,7 @@ import pytest
 import env
 
 from bot import create_bot
-from discord.ext.test import configure, get_config, get_message, message
+from discord.ext.test import configure, get_config, get_message, message, empty_queue
 
 
 @pytest.fixture(autouse=True)
@@ -13,11 +13,14 @@ def disable_env_local_flags():
 
 
 @pytest.fixture(autouse=True)
-def bot(cog_list, request):
+async def bot(cog_list, request):
     if 'nobot' in request.keywords:
+        yield
         return
     bot = create_bot(cogs.get_full_path(cog_list))
     configure(bot)
+    yield bot
+    await empty_queue()
 
 
 @pytest.fixture()
@@ -30,6 +33,11 @@ def guild(config):
     return config.guilds[0]
 
 
+@pytest.fixture()
+def channel(config):
+    return config.channels[0]
+
+
 async def send_cmd(*args):
     await message('j ' + ' '.join(args))
 
@@ -39,4 +47,4 @@ def verify_message(exact='', contains=''):
     if exact:
         assert msg.content == exact
     elif contains:
-        assert exact not in msg.content
+        assert contains in msg.content
