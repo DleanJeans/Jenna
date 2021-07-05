@@ -189,6 +189,12 @@ class Help(commands.Cog):
         self.bot = bot
         bot.remove_command('help')
         bot.help_command = EmbedHelpCommand()
+
+    @commands.Cog.listener()
+    async def on_message(self, msg):
+        if msg.content == self.bot.user.mention:
+            ctx = await self.bot.get_context(msg)
+            await ctx.send_help()
     
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
