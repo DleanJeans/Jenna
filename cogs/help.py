@@ -13,20 +13,20 @@ BRIEFS_FILE = os.path.join(os.path.dirname(__file__), 'common/help_briefs.txt')
 with open(BRIEFS_FILE, encoding='utf8') as file:
     BRIEFS = file.read().split('\n\n')
     BRIEFS = [b.split('|') for b in BRIEFS]
-    BRIEFS = { command: brief.strip() for command, brief in BRIEFS}
+    BRIEFS = {command: brief.strip() for command, brief in BRIEFS}
 
 COG_EMOTES = {
-    'Texts': '🗨️',
     'Images': '🖼️',
-    'S': 'es',
+    'Texts': '🗨️',
     'Snipe': '🕵',
     'Emotes': 'me',
-    'Games': '🎲',
+    'Misc': '♾️',
+    'S': 'es',
     'Nhoặn': 'joikhomg',
-    'Misc': '♾️'
+    'Games': '🎲',
 }
 
-COG_FROM_EMOTES = { v: k for k, v in COG_EMOTES.items() }
+COG_FROM_EMOTES = {v: k for k, v in COG_EMOTES.items()}
 
 GLOBE = '🌐'
 DEFAULT_HELP = ''
@@ -42,8 +42,10 @@ ARG_NEW_BRACKETS = {
     '>': ']',
 }
 
+
 def owner_only(command):
     return OWNER_CHECK in str(command.checks)
+
 
 class EmbedHelpCommand(commands.HelpCommand):
     def get_command_signature(self, command, with_args=False):
@@ -58,7 +60,7 @@ class EmbedHelpCommand(commands.HelpCommand):
                 args[i] = brackets[0] + a[1:-1] + brackets[1]
             signature += ' ' + ' '.join(args)
         return signature.strip()
-    
+
     def create_embed(self):
         bot = self.context.bot
         bot_user = bot.user
@@ -71,7 +73,7 @@ class EmbedHelpCommand(commands.HelpCommand):
         embed = await self.get_bot_help()
         msg = await self.get_destination().send(embed=embed)
         await self.add_buttons(msg)
-    
+
     async def get_bot_help(self):
         bot = self.context.bot
         embed = self.create_embed()
@@ -83,19 +85,19 @@ class EmbedHelpCommand(commands.HelpCommand):
             command_names = cog_to_commands.get(cog_name, [])
             for command in cog.walk_commands():
                 if command.hidden or command in done or owner_only(command): continue
-                
+
                 signature = self.get_command_signature(command)
                 command_names += [signature]
                 done += [command]
-            
+
             if command_names:
                 cog_to_commands[cog_name] = command_names
-                
+
         for cog, commands in cog_to_commands.items():
             cog_name = await self.get_cog_emoted_name(cog)
             commands = const.BULLET.join(f'`{c}`' for c in commands)
             embed.add_field(name=cog_name, value=commands, inline=False)
-        
+
         return embed
 
     async def get_cog_emoted_name(self, cog):
@@ -123,19 +125,21 @@ class EmbedHelpCommand(commands.HelpCommand):
             cog = COG_FROM_EMOTES[emoji]
             cog = self.context.bot.get_cog(cog)
             embed = await self.get_cog_help(cog)
-        
+
         message = reaction.message
         embed.color = message.embeds[0].color
         await message.edit(embed=embed)
-        try: await message.remove_reaction(reaction, user)
-        except: pass
+        try:
+            await message.remove_reaction(reaction, user)
+        except:
+            pass
 
     async def send_cog_help(self, cog):
         embed = await self.get_cog_help(cog)
         msg = await self.get_destination().send(embed=embed)
 
         await self.add_close_button(msg)
-    
+
     async def get_cog_help(self, cog):
         embed = self.create_embed()
         cog_name = await self.get_cog_emoted_name(cog)
@@ -151,7 +155,7 @@ class EmbedHelpCommand(commands.HelpCommand):
                 embed.add_field(name=cog_name, value=joined)
                 cog_name = const.INVISIBLE
                 command_helps = [text]
-        
+
         joined = '\n\n'.join(command_helps)
         embed.add_field(name=cog_name, value=joined)
         return embed
@@ -165,7 +169,7 @@ class EmbedHelpCommand(commands.HelpCommand):
 
         await self.add_close_button(msg)
         return msg
-    
+
     async def send_group_help(self, group):
         embed = self.create_embed()
         cog = await self.get_cog_emoted_name(group.cog_name)
@@ -177,12 +181,13 @@ class EmbedHelpCommand(commands.HelpCommand):
         embed.add_field(name=cog, value=command_helps)
         msg = await self.get_destination().send(embed=embed)
         await self.add_close_button(msg)
-    
-    def get_command_help(self, command):        
+
+    def get_command_help(self, command):
         signature = self.get_command_signature(command, with_args=True)
         brief = BRIEFS.get(command.qualified_name, DEFAULT_HELP)
         if brief: brief = '\n' + brief
         return f'`{signature}`{brief}'.format(prefix=self.clean_prefix)
+
 
 class Help(commands.Cog):
     def __init__(self, bot):
@@ -195,11 +200,11 @@ class Help(commands.Cog):
         if msg.content == self.bot.user.mention:
             ctx = await self.bot.get_context(msg)
             await ctx.send_help()
-    
+
     @commands.Cog.listener()
     async def on_command_error(self, ctx, error):
         if isinstance(error, commands.UserInputError):
-            error.args = (error.args[0].replace('"', '`'),)
+            error.args = (error.args[0].replace('"', '`'), )
             if type(error) is commands.MissingRequiredArgument:
                 await ctx.send(f'Missing `{error.param.name}`!')
                 await ctx.send_help(ctx.command)
@@ -216,9 +221,8 @@ class Help(commands.Cog):
 
             msg = ctx.message
             source = ''.join([
-                f'by {msg.author.mention} ({msg.author.display_name})\n',
-                f'in {msg.channel.mention} of `{msg.guild}`\n' if not isinstance(msg.channel, discord.DMChannel) else '',
-                f'[Jump]({msg.jump_url})'
+                f'by {msg.author.mention} ({msg.author.display_name})\n', f'in {msg.channel.mention} of `{msg.guild}`\n'
+                if not isinstance(msg.channel, discord.DMChannel) else '', f'[Jump]({msg.jump_url})'
             ])
             author_embed = colors.embed_error(description=msg.content).add_field(name='Source', value=source)
             error_text = getattr(error.original, 'text', None) if hasattr(error, 'original') else error
@@ -227,7 +231,9 @@ class Help(commands.Cog):
                 await ctx.send(embed=user_embed)
             await self.bot.owner.send(f'```{exception}```', embed=author_embed)
 
-ignored_errors = (commands.CommandNotFound,)
+
+ignored_errors = (commands.CommandNotFound, )
+
 
 def setup(bot):
     bot.add_cog(Help(bot))

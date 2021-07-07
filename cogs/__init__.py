@@ -3,22 +3,23 @@ PERSIST = 'Persist'
 
 NAMES = [
     'persist',
-    'dank',
+
     'help',
-    'alpha',
-    'react',
     'cute',
+    'dank',
     'preview',
 
-    'texts',
     'images',
-    's',
+    'texts',
     'snipe',
     'emotes',
+    'react',
+    'misc',
+    's',
+    'nhoan',
     'games',
 
-    'nhoan',
-    'misc'
+    'alpha',
 ]
 
 
@@ -27,3 +28,5 @@ def get_full_path(names):
 
 
 LIST = get_full_path(NAMES)
+
+LIST += ['jishaku']

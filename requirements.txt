@@ -8,3 +8,4 @@ beautifulsoup4==4.9.1
 python-dotenv==0.14.0
 unidecode==1.2.0
 aiocfscrape==1.0.0
+jishaku==2.0.0
