@@ -13,9 +13,11 @@ class Jenna(commands.Bot):
     async def on_ready(self):
         await self.set_activity_to_help_command()
         await self.notify_owner()
+        self.add_sk_alias_for_jishaku()
 
     async def set_activity_to_help_command(self):
-        await self.change_presence(activity=Activity(type=ActivityType.watching, name=HELP_COMMAND))
+        await self.change_presence(
+            activity=Activity(type=ActivityType.watching, name=HELP_COMMAND))
 
     async def notify_owner(self):
         await self.fetch_owner()
@@ -25,3 +27,7 @@ class Jenna(commands.Bot):
     async def fetch_owner(self):
         await self.is_owner(self.user)
         self.owner = self.get_user(self.owner_id)
+
+    def add_sk_alias_for_jishaku(self):
+        jishaku = self.get_command('jishaku')
+        self.all_commands['sk'] = jishaku

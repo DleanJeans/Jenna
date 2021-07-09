@@ -12,12 +12,22 @@ def disable_env_local_flags():
     env.TESTING = False
 
 
+@pytest.fixture
+def cog_list():
+    return []
+
+
+@pytest.fixture
+def external_cogs():
+    return []
+
+
 @pytest.fixture(autouse=True)
-async def bot(cog_list, request):
+async def bot(cog_list, external_cogs, request):
     if 'nobot' in request.keywords:
         yield
         return
-    bot = create_bot(cogs.get_full_path(cog_list))
+    bot = create_bot(cogs.get_full_path(cog_list) + external_cogs)
     configure(bot)
     yield bot
     await empty_queue()
@@ -36,6 +46,11 @@ def guild(config):
 @pytest.fixture()
 def channel(config):
     return config.channels[0]
+
+
+@pytest.fixture()
+def members(config):
+    return config.members
 
 
 async def send_cmd(*args):
