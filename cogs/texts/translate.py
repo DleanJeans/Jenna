@@ -111,22 +111,30 @@ async def translate(ctx, src2dest, origin):
     return translated
 
 
+ICON = 'https://upload.wikimedia.org/wikipedia/commons/d/db/Google_Translate_Icon.png'
+
+
 async def embed_translate(ctx, src2dest, text):
     translated = await translate(ctx, src2dest, text)
 
     translate_url = TRANSLATE_URL.format(translated.src, translated.dest, quote(translated.origin))
-    embed = discord.Embed(title=GOOGLE_TRANSLATE, url=translate_url, color=0x4a88ed)
+    embed = discord.Embed(color=0x4a88ed)
+    embed.set_author(name=GOOGLE_TRANSLATE, url=translate_url, icon_url=ICON)
 
     src_lang_and_code = get_language_and_code_in_brackets(translated.src)
     dest_lang_and_code = get_language_and_code_in_brackets(translated.dest)
-    embed.add_field(name=f'{src_lang_and_code}', value=translated.origin)
-    embed.add_field(name=f'{dest_lang_and_code}', value=translated.text)
+    embed.add_field(name=f'{src_lang_and_code}', value=enclose_in_codeblock(translated.origin))
+    embed.add_field(name=f'{dest_lang_and_code}', value=enclose_in_codeblock(translated.text))
 
     return embed
 
 
 def get_language_and_code_in_brackets(code):
     return f'{SUPPORTED_LANGS[code].title()} ({code})'
+
+
+def enclose_in_codeblock(text):
+    return f'```{text}```'
 
 
 def get_supported_languages():

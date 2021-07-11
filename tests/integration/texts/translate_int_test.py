@@ -63,7 +63,7 @@ async def test_given_emoji_only__emoji_should_be_cleaned():
     verify_message(CLEAN_EMOJI)
 
     await send_cmd('tr', EMOJI)
-    assert get_dest_text() == CLEAN_EMOJI
+    assert CLEAN_EMOJI in get_dest_text()
 
 
 @pytest.mark.asyncio
@@ -113,15 +113,14 @@ async def test_print_supported_langs_no_error():
 @pytest.mark.asyncio
 async def test_embed_displayed_horizontally():
     await send_cmd('tr bonjour fr>en')
-    assert get_src_lang() == 'French (fr)'
-    assert get_src_text() == 'bonjour'
-    assert get_dest_lang() == 'English (en)'
-    assert get_dest_text() == 'hello'
+    assert 'French (fr)' in get_src_lang()
+    assert 'English (en)' in get_dest_lang()
+    assert 'bonjour' in get_src_text()
+    assert 'hello' in get_dest_text()
 
 
 @pytest.mark.asyncio
-async def test_url_should_not_have_lang_code_in_text():
+async def test_url_should_not_have_lang_code_in_text_param():
     from_french = 'fr>'
     await send_cmd('tr lac', from_french)
-    print(get_embed(peek=True).url)
-    assert urlquote(from_french) not in get_embed().url
+    assert urlquote(from_french) not in get_embed().author.url
