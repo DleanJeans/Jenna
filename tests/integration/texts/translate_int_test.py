@@ -3,6 +3,7 @@ from discord.ext import commands
 from discord.ext.test import get_embed
 from googletrans.models import Translated
 from tests.integration.conftest import send_cmd, verify_message
+from urllib.parse import quote as urlquote
 
 EMOJI = '<:emoji:12345>'
 
@@ -33,6 +34,26 @@ async def mock_translator(mocker):
 
     from googletrans import Translator
     mocker.patch.object(Translator, 'translate', side_effect=mock_translate)
+
+
+def get_src_lang():
+    return get_fields()[0].name
+
+
+def get_dest_lang():
+    return get_fields()[1].name
+
+
+def get_src_text():
+    return get_fields()[0].value
+
+
+def get_dest_text():
+    return get_fields()[1].value
+
+
+def get_fields():
+    return get_embed(peek=True).fields
 
 
 @pytest.mark.asyncio
@@ -98,21 +119,9 @@ async def test_embed_displayed_horizontally():
     assert get_dest_text() == 'hello'
 
 
-def get_src_lang():
-    return get_fields()[0].name
-
-
-def get_dest_lang():
-    return get_fields()[1].name
-
-
-def get_src_text():
-    return get_fields()[0].value
-
-
-def get_dest_text():
-    return get_fields()[1].value
-
-
-def get_fields():
-    return get_embed(peek=True).fields
+@pytest.mark.asyncio
+async def test_url_should_not_have_lang_code_in_text():
+    from_french = 'fr>'
+    await send_cmd('tr lac', from_french)
+    print(get_embed(peek=True).url)
+    assert urlquote(from_french) not in get_embed().url

@@ -114,7 +114,7 @@ async def translate(ctx, src2dest, origin):
 async def embed_translate(ctx, src2dest, text):
     translated = await translate(ctx, src2dest, text)
 
-    translate_url = TRANSLATE_URL.format(translated.src, translated.dest, quote(text))
+    translate_url = TRANSLATE_URL.format(translated.src, translated.dest, quote(translated.origin))
     embed = discord.Embed(title=GOOGLE_TRANSLATE, url=translate_url, color=0x4a88ed)
 
     src_lang_and_code = get_language_and_code_in_brackets(translated.src)
