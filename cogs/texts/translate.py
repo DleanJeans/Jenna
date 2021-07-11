@@ -1,7 +1,7 @@
+import discord
 import googletrans
 import re
 
-from ..common import colors
 from discord.ext import commands
 from googletrans import LANGCODES, LANGUAGES, Translator
 from googletrans.models import Translated
@@ -70,8 +70,7 @@ async def translate(ctx, src2dest, origin):
 
     for lang in src2dest + suffix_src2dest:
         if lang and lang not in SUPPORTED_LANGS:
-            raise commands.BadArgument(
-                INVALID_LANG_CODE.format(lang, ctx.prefix))
+            raise commands.BadArgument(INVALID_LANG_CODE.format(lang, ctx.prefix))
     src, dest = src2dest
     src = suffix_src2dest[0] or src
     dest = suffix_src2dest[1] or dest
@@ -91,7 +90,6 @@ async def translate(ctx, src2dest, origin):
         'text': 'Google Translate stopped working! Try again later.',
         'src': '?',
         'dest': '?',
-        'src2dest': '',
         'origin': origin
     })
     for i in range(3):
@@ -107,7 +105,6 @@ async def translate(ctx, src2dest, origin):
         except:
             translator = Translator()
 
-    translated.src2dest = f'{SUPPORTED_LANGS[translated.src.lower()]}>{SUPPORTED_LANGS[translated.dest.lower()]}'
     for word, meaning in CUSTOM_DICT.items():
         translated.text = translated.text.replace(word, meaning)
 
@@ -117,23 +114,23 @@ async def translate(ctx, src2dest, origin):
 async def embed_translate(ctx, src2dest, text):
     translated = await translate(ctx, src2dest, text)
 
-    translate_url = TRANSLATE_URL.format(translated.src, translated.dest,
-                                         quote(text))
-    embed = colors.embed(title=GOOGLE_TRANSLATE,
-                         url=translate_url,
-                         description=translated.text,
-                         color=0x4a88ed)
-    embed.add_field(
-        name=f'{translated.src2dest} ({translated.src}>{translated.dest}):',
-        value=translated.origin)
+    translate_url = TRANSLATE_URL.format(translated.src, translated.dest, quote(text))
+    embed = discord.Embed(title=GOOGLE_TRANSLATE, url=translate_url, color=0x4a88ed)
+
+    src_lang_and_code = get_language_and_code_in_brackets(translated.src)
+    dest_lang_and_code = get_language_and_code_in_brackets(translated.dest)
+    embed.add_field(name=f'{src_lang_and_code}', value=translated.origin)
+    embed.add_field(name=f'{dest_lang_and_code}', value=translated.text)
 
     return embed
 
 
+def get_language_and_code_in_brackets(code):
+    return f'{SUPPORTED_LANGS[code].title()} ({code})'
+
+
 def get_supported_languages():
     output = '**Supported Languages**:\n'
-    output += '\n'.join([
-        f'`{code}`-{lang.title()}'
-        for code, lang in googletrans.LANGUAGES.items()
-    ])
+    output += '\n'.join(
+        [f'`{code}`-{lang.title()}' for code, lang in googletrans.LANGUAGES.items()])
     return output

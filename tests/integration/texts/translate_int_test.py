@@ -1,6 +1,6 @@
-from discord.ext.test.runner import get_embed
-from discord.ext.test.verify import verify
 import pytest
+from discord.ext import commands
+from discord.ext.test import get_embed
 from googletrans.models import Translated
 from tests.integration.conftest import send_cmd, verify_message
 
@@ -17,15 +17,17 @@ from cogs.texts.translate import EMOJI_REGEX
 
 
 @pytest.mark.nobot
-def test_emoji_simplifier_regex():
+@pytest.mark.asyncio
+async def test_emoji_simplifier_regex():
     assert re.sub(EMOJI_REGEX, r'\2', EMOJI) == ':emoji:'
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 async def mock_translator(mocker):
     def mock_translate(origin, src, dest):
         if len(origin) <= 2:
-            raise TypeError('Too short')
+            raise TypeError('Too short to translate :|')
+        src = 'en' if src == 'auto' else src
         text = 'hello' if origin == 'bonjour' else origin
         return Translated(src, dest, origin, text, pronunciation='', parts=[])
 
@@ -33,24 +35,84 @@ async def mock_translator(mocker):
     mocker.patch.object(Translator, 'translate', side_effect=mock_translate)
 
 
-#send_cmd, verify_message
 @pytest.mark.asyncio
-async def test_emoji_only__emoji_cleaned(mock_translator):
+async def test_given_emoji_only__emoji_should_be_cleaned():
     CLEAN_EMOJI = ':emoji:'
     await send_cmd('str', EMOJI)
     verify_message(CLEAN_EMOJI)
 
     await send_cmd('tr', EMOJI)
-    assert get_embed().description == CLEAN_EMOJI
+    assert get_dest_text() == CLEAN_EMOJI
 
 
 @pytest.mark.asyncio
-async def test_text_with_emojis__emojis_removed(mock_translator):
+async def test_given_text_with_emojis__emojis_should_be_removed():
     await send_cmd('str bonjour', EMOJI)
     verify_message('hello')
 
 
 @pytest.mark.asyncio
-async def test_origin(mock_translator):
-    await send_cmd('tr bonjour')
-    assert get_embed().fields[0].value == 'bonjour'
+async def test_zh_without_cn_should_be_corrected_to_zh_cn():
+    await send_cmd('tr hello >zh')
+    assert 'zh-cn' in get_dest_lang()
+
+
+@pytest.mark.asyncio
+async def test_zh_underscore_ch_should_be_corrected_to_zh_dash_cn():
+    await send_cmd('tr hello >zh_cn')
+    assert 'zh-cn' in get_dest_lang()
+
+
+@pytest.mark.asyncio
+async def test_given_en_text__should_translate_to_vi():
+    await send_cmd('tr hello')
+    assert 'vi' in get_dest_lang()
+
+
+@pytest.mark.asyncio
+async def test_should_raise_bad_lang_code():
+    with pytest.raises(commands.BadArgument):
+        await send_cmd('tr hello vn>')
+
+
+@pytest.mark.asyncio
+async def test_should_text_too_short():
+    with pytest.raises(commands.BadArgument):
+        await send_cmd('tr a')
+
+
+@pytest.mark.asyncio
+async def test_print_supported_langs_no_error():
+    await send_cmd('tr lang')
+    await send_cmd('tr langs')
+    await send_cmd('str lang')
+    await send_cmd('str langs')
+
+
+@pytest.mark.asyncio
+async def test_embed_displayed_horizontally():
+    await send_cmd('tr bonjour fr>en')
+    assert get_src_lang() == 'French (fr)'
+    assert get_src_text() == 'bonjour'
+    assert get_dest_lang() == 'English (en)'
+    assert get_dest_text() == 'hello'
+
+
+def get_src_lang():
+    return get_fields()[0].name
+
+
+def get_dest_lang():
+    return get_fields()[1].name
+
+
+def get_src_text():
+    return get_fields()[0].value
+
+
+def get_dest_text():
+    return get_fields()[1].value
+
+
+def get_fields():
+    return get_embed(peek=True).fields
