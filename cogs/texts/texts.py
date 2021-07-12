@@ -6,7 +6,6 @@ import upsidedown
 from . import define
 from . import palabrasaleatorias as pa
 from . import randomword
-from . import translate as gtranslate
 from ..common import colors
 from ..common import converter as conv
 from ..common import utils
@@ -15,18 +14,19 @@ from ..emotes.const import EMOJI_PATTERN
 from discord.ext import commands
 from typing import Optional
 
+from .translator import translator, LanguagePair, to_language_pair
 
 class Texts(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.translator = googletrans.Translator()
-    
+
     @commands.command(aliases=['usd'])
     async def upsidedown(self, ctx, *, text):
         text = text.replace('||', '')
         text = upsidedown.transform(text)
         await ctx.send(text)
-    
+
     @commands.command(aliases=['usb'], hidden=True)
     async def unscramble(self, ctx, *, text):
         await ctx.trigger_typing()
@@ -37,27 +37,27 @@ class Texts(commands.Cog):
         else:
             response += 'Not found!'
         await ctx.send(response)
-    
+
     @commands.command(aliases=['str'])
-    async def saytranslate(self, ctx, src2dest:Optional[gtranslate.Src2Dest]='auto>en', *, text=None):
+    async def saytranslate(self, ctx, src2dest:Optional[to_language_pair]=LanguagePair.default(), *, text=None):
         await ctx.trigger_typing()
         text, ref_message = utils.get_ref_message_text_if_no_text(ctx, text)
         text, last_message = await utils.get_last_message_text_if_no_text(ctx, text)
-        translated = await gtranslate.translate(ctx, src2dest, text)
+        translated = await translator.translate(ctx, src2dest, text)
         where = ref_message or last_message or ctx
         await where.reply(translated.text, mention_author=False)
-    
+
     @commands.group(aliases=['tr', 'tl'], invoke_without_command=True)
-    async def translate(self, ctx, src2dest:Optional[gtranslate.Src2Dest]='auto>en', *, text=None):
+    async def translate(self, ctx, src2dest:Optional[to_language_pair]=LanguagePair.default(), *, text=None):
         await ctx.trigger_typing()
         text, _ = utils.get_ref_message_text_if_no_text(ctx, text)
         text, _ = await utils.get_last_message_text_if_no_text(ctx, text)
-        embed = await gtranslate.embed_translate(ctx, src2dest, text)
+        embed = await translator.embed_translate(ctx, src2dest, text)
         await ctx.send(embed=embed)
 
     @translate.command(name='langs', aliases=['lang'])
     async def translatelangs(self, ctx):
-        output = gtranslate.get_supported_languages()
+        output = translator.get_supported_languages()
         await ctx.message.author.send(output)
         await utils.emotes.react_tick(ctx.message)
 
@@ -79,7 +79,7 @@ class Texts(commands.Cog):
         embed = colors.embed(title=word, url=url, description=definition)
         embed.set_author(name=f'Random {what}', url=randomword.URL)
         await ctx.send(embed=embed)
-    
+
     @commands.command(aliases=['rdi'])
     async def randomidiom(self, ctx):
         await self.send_random(ctx, randomword.IDIOM)
@@ -91,13 +91,13 @@ class Texts(commands.Cog):
         command = ' '.join(command)
         embed = await define.define(lang, word, full)
         await ctx.send(embed=embed)
-    
+
     @define.command(name='langs', aliases=['lang'])
     async def dictlangs(self, ctx):
         languages = '\n'.join([f'`{code}` - {lang}' for code, lang in define.SUPPORTED_LANGS.items()])
         response = 'Google Dictionary supported languages:\n' + languages
         await ctx.send(response)
-    
+
     @commands.command(aliases=['s'])
     async def say(self, ctx, *, text):
         Emotes = self.bot.get_cog('Emotes')
@@ -109,7 +109,7 @@ class Texts(commands.Cog):
                 emoji_code = await Emotes.get_external_emoji(ctx, name, add=True)
                 if not emoji_code: continue
             text = text.replace(plain_emoji, str(emoji_code))
-        
+
         await ctx.send(text)
 
 

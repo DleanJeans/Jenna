@@ -1,9 +1,12 @@
+from discord.ext.commands.errors import BadArgument
+from cogs.texts.translator.language_pair import InvalidLanguageCode
 import pytest
 from discord.ext import commands
 from discord.ext.test import get_embed
 from googletrans.models import Translated
 from tests.integration.conftest import send_cmd, verify_message
 from urllib.parse import quote as urlquote
+from cogs.common.api.googledict import translate
 
 EMOJI = '<:emoji:12345>'
 
@@ -11,16 +14,6 @@ EMOJI = '<:emoji:12345>'
 @pytest.fixture
 def cog_list():
     return ['texts']
-
-
-import re
-from cogs.texts.translate import EMOJI_REGEX
-
-
-@pytest.mark.nobot
-@pytest.mark.asyncio
-async def test_emoji_simplifier_regex():
-    assert re.sub(EMOJI_REGEX, r'\2', EMOJI) == ':emoji:'
 
 
 mock_src = 'en'
@@ -31,14 +24,12 @@ async def mock_translator(mocker):
     global mock_src
 
     def mock_translate(origin, src, dest):
-        if len(origin) <= 2:
-            raise TypeError('Too short to translate :|')
         src = mock_src if src == 'auto' else src
         text = 'hello' if origin == 'bonjour' else origin
         return Translated(src, dest, origin, text, pronunciation='', parts=[])
 
     from googletrans import Translator
-    mocker.patch.object(Translator, 'translate', side_effect=mock_translate)
+    mocker.patch('cogs.common.api.googletrans_wrapper.translate', side_effect=mock_translate)
 
     yield
     mock_src = 'en'
@@ -99,15 +90,9 @@ async def test_given_en_text__should_translate_to_vi():
 
 
 @pytest.mark.asyncio
-async def test_should_raise_bad_lang_code():
-    with pytest.raises(commands.BadArgument):
+async def test_should_raise_invalid_lang_code():
+    with pytest.raises(BadArgument):
         await send_cmd('tr hello vn>')
-
-
-@pytest.mark.asyncio
-async def test_should_text_too_short():
-    with pytest.raises(commands.BadArgument):
-        await send_cmd('tr a')
 
 
 @pytest.mark.asyncio
