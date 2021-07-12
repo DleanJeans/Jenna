@@ -41,3 +41,13 @@ async def test_request_api_and_parse():
 async def test_chinese():
     result = await translate('既然我找不到你，那只有站在最显眼的地方让你来找', 'vi')
     assert result.text == 'Vì không tìm được em nên anh chỉ có thể đứng ở nơi dễ thấy nhất để em đến tìm'
+
+
+@pytest.mark.asyncio
+@pytest.mark.enable_socket
+async def test_multiline():
+    result = await translate(
+        '''In many countries today the eating habits and lifestyle of children are different from those of previous generations. Some people say this has had a negative effect on their health.
+To what extent do you agree or disagree with this opinion?''', 'vi')
+    assert result.text == '''Ở nhiều nước hiện nay, thói quen ăn uống và lối sống của trẻ em khác với các thế hệ trước. Một số người nói rằng điều này đã ảnh hưởng xấu đến sức khỏe của họ.
+Bạn đồng ý hay không đồng ý với ý kiến ​​này ở mức độ nào?'''
