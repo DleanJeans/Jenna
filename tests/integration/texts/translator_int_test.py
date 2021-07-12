@@ -29,7 +29,7 @@ async def mock_translator(mocker):
         return Translated(src, dest, origin, text, pronunciation='', parts=[])
 
     from googletrans import Translator
-    mocker.patch('cogs.common.api.googletrans_wrapper.translate', side_effect=mock_translate)
+    mocker.patch('cogs.common.api.googledict.translate', side_effect=mock_translate)
 
     yield
     mock_src = 'en'

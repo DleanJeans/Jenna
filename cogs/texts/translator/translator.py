@@ -7,7 +7,7 @@ from discord.ext import commands
 from googletrans import LANGCODES, LANGUAGES
 from urllib.parse import quote as urlquote
 
-from cogs.common.api import googletrans_wrapper as api
+from cogs.common.api import googledict as api
 from cogs.common.api.googledict import Translated
 from .language_pair import InvalidLanguageCode, LanguagePair, NotLanguagePairFormat
 
