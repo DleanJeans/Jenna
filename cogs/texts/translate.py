@@ -130,10 +130,11 @@ async def embed_translate(ctx, src2dest, text):
 
 
 def get_language_and_code_in_brackets(code):
+    code = code.lower()
     return f'{SUPPORTED_LANGS[code].title()} ({code})'
 
 
-def enclose_in_codeblock(text):
+def enclose_in_codeblock(text: str):
     return f'```{text}```'
 
 

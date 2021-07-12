@@ -23,17 +23,25 @@ async def test_emoji_simplifier_regex():
     assert re.sub(EMOJI_REGEX, r'\2', EMOJI) == ':emoji:'
 
 
+mock_src = 'en'
+
+
 @pytest.fixture(autouse=True)
 async def mock_translator(mocker):
+    global mock_src
+
     def mock_translate(origin, src, dest):
         if len(origin) <= 2:
             raise TypeError('Too short to translate :|')
-        src = 'en' if src == 'auto' else src
+        src = mock_src if src == 'auto' else src
         text = 'hello' if origin == 'bonjour' else origin
         return Translated(src, dest, origin, text, pronunciation='', parts=[])
 
     from googletrans import Translator
     mocker.patch.object(Translator, 'translate', side_effect=mock_translate)
+
+    yield
+    mock_src = 'en'
 
 
 def get_src_lang():
@@ -124,3 +132,10 @@ async def test_url_should_not_have_lang_code_in_text_param():
     from_french = 'fr>'
     await send_cmd('tr lac', from_french)
     assert urlquote(from_french) not in get_embed().author.url
+
+
+@pytest.mark.asyncio
+async def test_zh_CN_no_error():
+    global mock_src
+    mock_src = 'zh-CN'
+    await send_cmd('tr 既然我')
