@@ -21,7 +21,7 @@ async def test_lyric():
 @pytest.mark.asyncio
 @pytest.mark.enable_socket
 async def test_one_character_no_error():
-    result = await translate('a')
+    await translate('a')
 
 
 @pytest.mark.asyncio

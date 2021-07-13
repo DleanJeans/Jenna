@@ -124,3 +124,9 @@ async def test_zh_CN_no_error():
     global mock_src
     mock_src = 'zh-CN'
     await send_cmd('tr 既然我')
+
+
+@pytest.mark.asyncio
+async def test_full_language_name():
+    await send_cmd('tr spanish> hola')
+    assert 'Spanish (es)' in get_src_lang()

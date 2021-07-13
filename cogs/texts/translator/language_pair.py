@@ -1,4 +1,5 @@
 import re
+import translatepy
 from cogs.common.api.googledict import SUPPORTED_LANGS
 
 
@@ -24,12 +25,17 @@ class LanguagePair:
 
     @classmethod
     def from_string(cls, string, *, use_default_if_empty=True):
+        string = string.lower()
         matches = re.findall(REGEX, string)
         raise_error_if_invalid_format(string, matches)
+
         src, dest = matches[0]
         if use_default_if_empty:
             src, dest = use_default(src, dest)
+
+        src, dest = map(shorten_full_language_names, [src, dest])
         src, dest = map(apply_zh_fixes, [src, dest])
+
         raise_error_if_any_not_supported([src, dest])
         return cls(src, dest)
 
@@ -48,6 +54,19 @@ class LanguagePair:
 
     def __repr__(self) -> str:
         return f'LanguagePair({self})'
+
+
+def shorten_full_language_names(lang):
+    is_alpha2 = len(lang) == 2
+    is_chinese_codes = lang in ['zh-cn', 'zh-tw']
+    is_language_code = lang and is_alpha2 or is_chinese_codes
+    if not is_language_code:
+        try:
+            language = translatepy.Language(lang)
+            return language.alpha2
+        except:
+            pass
+    return lang
 
 
 def apply_zh_fixes(lang):

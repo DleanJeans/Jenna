@@ -4,32 +4,23 @@ import googletrans
 import re
 
 from discord.ext import commands
-from googletrans import LANGCODES, LANGUAGES
 from urllib.parse import quote as urlquote
 
 from cogs.common.api import googledict as api
-from cogs.common.api.googledict import Translated
+from cogs.common.api.googledict import Translated, SUPPORTED_LANGS
 from .language_pair import InvalidLanguageCode, LanguagePair, NotLanguagePairFormat
 
 GOOGLE_TRANSLATE = 'Google Translate'
 TRANSLATE_URL = 'https://translate.google.com/?sl={}&tl={}&text={}&op=translate'
-INVALID_LANG_CODE = '`{}` is not a language code. Type `{}translate langs` to see the full language codes. You can also use full language names.'
 NO_TEXT = 'The last message has no text'
-SUPPORTED_LANGS = {'auto': 'Automatic', **LANGUAGES, **LANGCODES, '???': '???'}
-
+NA = '?'
+TRY_AGAIN = 'Cannot reach Google Translate! Try again in a few minutes!'
+RETRIES = 3
 EMOJI_REGEX = r'(<a*(:[^:\s]+:)\d+>)'
-CUSTOM_DICT = {
-    'nhoan': 'cringy',
-}
 
 
 def to_language_pair(src2dest):
     return LanguagePair.from_string(src2dest)
-
-
-NA = '?'
-TRY_AGAIN = 'Cannot reach Google Translate! Try again in a few minutes!'
-RETRIES = 3
 
 
 async def translate(ctx, src2dest: LanguagePair, text: str):

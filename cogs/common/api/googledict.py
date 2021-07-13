@@ -26,7 +26,7 @@ async def translate(text, dest='en', src='auto'):
 
     src = data.src
     origin = text
-    text = ''.join(sentence.trans for sentence in data.sentences)
+    text = ''.join(sentence.get('trans', '') for sentence in data.sentences if sentence)
 
     return Translated(src, dest, origin, text, data)
 
