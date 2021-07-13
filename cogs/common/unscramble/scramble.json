@@ -60,7 +60,9 @@
     "beach",
     "shell",
     "bunny",
-    "dirty"
+    "dirty",
+    "steal",
+    "admin"
   ],
   "6": [
     "carrot",
@@ -104,7 +106,8 @@
     "makeup",
     "rabbit",
     "easter",
-    "allies"
+    "allies",
+    "matlab"
   ],
   "7": [
     "channel",
@@ -131,7 +134,9 @@
     "testing",
     "tseries",
     "youtube",
-    "enemies"
+    "enemies",
+    "whisker",
+    "pincher"
   ],
   "8": [
     "whiskers",

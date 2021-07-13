@@ -33,13 +33,22 @@ async def test_dpytest_make_member(send_as_dank_memer):
     assert msg.author.name == DANK_MEMER
 
 
-@pytest.mark.asyncio
-async def test_words_in_preset(send_as_dank_memer):
-    INPUT = 'opiaripatn'
-    EXPECTED = 'apparition'
+@pytest.fixture
+def assert_scramble(send_as_dank_memer):
+    async def _assert_scramble(scrambled, expected):
+        await send_as_dank_memer(f'Scramble - `{scrambled}`')
+        assert expected in get_message().content
 
-    await send_as_dank_memer(f'Scramble - `{INPUT}`')
-    assert EXPECTED in get_message().content
+    return _assert_scramble
+
+
+@pytest.mark.asyncio
+async def test_unscramble_words_in_preset(assert_scramble):
+    await assert_scramble('opiaripatn', 'apparition')
+    await assert_scramble('mblata', 'matlab')
+    await assert_scramble('icrhepn', 'pincher')
+    await assert_scramble('aetsl', 'steal')
+    await assert_scramble('dnima', 'admin')
 
 
 @pytest.mark.asyncio
