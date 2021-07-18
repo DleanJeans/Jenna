@@ -7,7 +7,7 @@ import discord
 from conftest import send_cmd, verify_message
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def external_cogs():
     return ['jishaku']
 

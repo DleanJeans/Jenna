@@ -6,13 +6,13 @@ from discord.ext.test import backend, message, get_message
 from unittest.mock import patch, Mock
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def cog_list():
     return ['dank', 'texts']
 
 
 @pytest.fixture(autouse=True)
-def setup_bot(bot):
+def setup_bot(bot, clean_up_bot):
     pass
 
 

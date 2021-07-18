@@ -6,7 +6,7 @@ from discord.ext import commands
 
 
 @pytest.fixture(autouse=True)
-def setup_bot(bot):
+def setup_bot(bot, clean_up_bot):
     pass
 
 

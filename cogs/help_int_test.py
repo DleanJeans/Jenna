@@ -3,7 +3,7 @@ from discord.ext import commands
 from discord.ext.test import message, get_embed
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def cog_list():
     return ['help']
 

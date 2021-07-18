@@ -9,13 +9,13 @@ from urllib.parse import quote as urlquote
 EMOJI = '<:emoji:12345>'
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def cog_list():
     return ['texts']
 
 
 @pytest.fixture(autouse=True)
-def setup_bot(bot):
+def setup_bot(bot, clean_up_bot):
     pass
 
 

@@ -1,9 +1,23 @@
-import env
+import asyncio
 import cogs
+import env
 import pytest
 
 from bot import create_bot
+from difflib import SequenceMatcher
 from discord.ext.test import configure, get_config, get_message, message, empty_queue
+
+
+@pytest.fixture(scope='session')
+def event_loop():
+    loop = asyncio.get_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest.fixture
+def similarity():
+    return lambda a, b: SequenceMatcher(None, a, b).ratio()
 
 
 @pytest.fixture(autouse=True)
@@ -12,21 +26,26 @@ def disable_env_local_flags():
     env.TESTING = False
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def cog_list():
     return []
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def external_cogs():
     return []
 
 
-@pytest.fixture
-async def bot(cog_list, external_cogs):
+@pytest.fixture(scope='module')
+def bot(cog_list, external_cogs):
     bot = create_bot(cogs.get_full_path(cog_list) + external_cogs)
     configure(bot)
-    yield bot
+    return bot
+
+
+@pytest.fixture
+async def clean_up_bot():
+    yield
     await empty_queue()
 
 
