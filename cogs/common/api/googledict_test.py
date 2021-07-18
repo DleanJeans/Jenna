@@ -3,6 +3,8 @@ from cogs.common.api.googledict import translate
 from dotmap import DotMap
 import requests_async
 
+from difflib import SequenceMatcher
+
 
 @pytest.mark.asyncio
 @pytest.mark.enable_socket
@@ -46,8 +48,12 @@ async def test_chinese():
 @pytest.mark.asyncio
 @pytest.mark.enable_socket
 async def test_multiline():
+    def similarity(a, b):
+        return SequenceMatcher(None, a, b).ratio()
+
     result = await translate(
         '''In many countries today the eating habits and lifestyle of children are different from those of previous generations. Some people say this has had a negative effect on their health.
 To what extent do you agree or disagree with this opinion?''', 'vi')
-    assert result.text == '''Ở nhiều nước hiện nay, thói quen ăn uống và lối sống của trẻ em khác với các thế hệ trước. Một số người nói rằng điều này đã ảnh hưởng xấu đến sức khỏe của họ.
+    EXPECTED = '''Ở nhiều nước hiện nay, thói quen ăn uống và lối sống của trẻ em khác với các thế hệ trước. Một số người nói rằng điều này đã ảnh hưởng xấu đến sức khỏe của họ.
 Bạn đồng ý hay không đồng ý với ý kiến ​​này ở mức độ nào?'''
+    assert similarity(result.text, EXPECTED) > 0.95

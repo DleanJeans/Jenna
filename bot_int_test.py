@@ -5,6 +5,11 @@ from discord.ext.test import message
 from discord.ext import commands
 
 
+@pytest.fixture(autouse=True)
+def setup_bot(bot):
+    pass
+
+
 @pytest.mark.asyncio
 async def test_prefix():
     await message('j help')

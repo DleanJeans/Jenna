@@ -1,12 +1,19 @@
 import pytest
+
 from asyncio.queues import QueueEmpty
 from conftest import send_cmd
 from discord.ext.test import backend, message, get_message
+from unittest.mock import patch, Mock
 
 
 @pytest.fixture
 def cog_list():
     return ['dank', 'texts']
+
+
+@pytest.fixture(autouse=True)
+def setup_bot(bot):
+    pass
 
 
 DANK_MEMER = 'Dank Memer'
@@ -52,10 +59,11 @@ async def test_unscramble_words_in_preset(assert_scramble):
 
 
 @pytest.mark.asyncio
-async def test_usb_scramble_wont_trigger_dank_memer(mocker):
+@patch('cogs.texts.texts.unscramble')
+async def test_usb_scramble_wont_trigger_dank_memer(mock_unscramble):
     EXPECTED = 'scramble'
     SCRAMBLED = EXPECTED[::-1]
-    mocker.patch('cogs.texts.texts.unscramble', return_value=[EXPECTED])
+    mock_unscramble.return_value = [EXPECTED]
 
     await send_cmd('usb', SCRAMBLED)
     assert EXPECTED in get_message().content

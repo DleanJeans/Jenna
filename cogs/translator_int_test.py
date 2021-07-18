@@ -1,12 +1,10 @@
-from discord.ext.commands.errors import BadArgument
-from cogs.texts.translator.language_pair import InvalidLanguageCode
 import pytest
-from discord.ext import commands
+
+from conftest import send_cmd, verify_message
+from discord.ext.commands.errors import BadArgument
 from discord.ext.test import get_embed
 from googletrans.models import Translated
-from tests.integration.conftest import send_cmd, verify_message
 from urllib.parse import quote as urlquote
-from cogs.common.api.googledict import translate
 
 EMOJI = '<:emoji:12345>'
 
@@ -14,6 +12,11 @@ EMOJI = '<:emoji:12345>'
 @pytest.fixture
 def cog_list():
     return ['texts']
+
+
+@pytest.fixture(autouse=True)
+def setup_bot(bot):
+    pass
 
 
 mock_src = 'en'

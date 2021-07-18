@@ -1,6 +1,6 @@
+import env
 import cogs
 import pytest
-import env
 
 from bot import create_bot
 from discord.ext.test import configure, get_config, get_message, message, empty_queue
@@ -22,11 +22,8 @@ def external_cogs():
     return []
 
 
-@pytest.fixture(autouse=True)
-async def bot(cog_list, external_cogs, request):
-    if 'nobot' in request.keywords:
-        yield
-        return
+@pytest.fixture
+async def bot(cog_list, external_cogs):
     bot = create_bot(cogs.get_full_path(cog_list) + external_cogs)
     configure(bot)
     yield bot
