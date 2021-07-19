@@ -117,6 +117,9 @@ def parse_results(raw_html):
         for ResultType in result_types:
             if ResultType.is_this_type(block):
                 result = ResultType()
-                result.parse_html(block)
-                yield result
+                try:
+                    result.parse_html(block)
+                    yield result
+                except:
+                    pass
                 break

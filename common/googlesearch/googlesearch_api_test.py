@@ -63,3 +63,9 @@ async def test_convert_temperature():
     result = await google_first_result('100 f = c')
     assert result.title == '100 Fahrenheit = 37.7778 Celsius'
     assert result.preview == '`Formula`: (100°F − 32) × 5/9 = 37.778°C'
+
+
+@pytest.mark.asyncio
+@pytest.mark.enable_socket
+async def test_ring_no_error():
+    result = await google_first_result('ring')
