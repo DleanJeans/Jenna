@@ -4,9 +4,11 @@ from discord import Activity, ActivityType
 from discord.ext import commands
 
 LOGGED_IN = 'Logged in as'
-TESTING_MSG = 'Jennie is up and running'
-PROD_MSG = "I'm ready to go!"
+TESTING_MSG = 'Ready for testing!'
+PROD_MSG = "Server restarted!"
 HELP_COMMAND = 'j help'
+
+TESTING_CHANNEL_ID = 664112170765910031
 
 
 class Jenna(commands.Bot):
@@ -21,7 +23,11 @@ class Jenna(commands.Bot):
 
     async def notify_owner(self):
         await self.fetch_owner()
-        await self.owner.send(TESTING_MSG if env.TESTING else PROD_MSG)
+        if env.TESTING:
+            testing_channel = self.get_channel(TESTING_CHANNEL_ID)
+            await testing_channel.send(f'{self.owner.mention} {TESTING_MSG}')
+        else:
+            await self.owner.send(PROD_MSG)
         print(LOGGED_IN, self.user)
 
     async def fetch_owner(self):
