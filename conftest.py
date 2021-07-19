@@ -20,6 +20,11 @@ def similarity():
     return lambda a, b: SequenceMatcher(None, a, b).ratio()
 
 
+@pytest.fixture
+def similar(similarity):
+    return lambda a, b, sim=95: similarity(a, b) >= sim / 100
+
+
 @pytest.fixture(autouse=True)
 def disable_env_local_flags():
     env.LOCAL = False

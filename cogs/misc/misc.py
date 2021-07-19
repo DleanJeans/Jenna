@@ -1,6 +1,6 @@
 import discord
 
-from . import covid, math, reddit
+from . import covid, math, reddit, google
 from ..common import colors
 from ..common import converter as conv
 from ..common import timedisplay
@@ -9,9 +9,9 @@ from discord.ext import commands
 from urllib.parse import quote_plus
 from typing import Optional
 
-
 MATH_BRIEF = 'Compute big numbers for you'
 INVITE_LINK = 'https://discord.com/api/oauth2/authorize?client_id=664109951781830666&permissions=3758484544&scope=bot'
+
 
 class Misc(commands.Cog):
     def __init__(self, bot):
@@ -20,12 +20,7 @@ class Misc(commands.Cog):
 
     @commands.command(aliases=['gg', 'g', 'whats'])
     async def google(self, ctx, *, query=None):
-        if not query:
-            last_message = await ctx.history(limit=1, before=ctx.message).flatten()
-            query = last_message[0].clean_content or ''
-        query = ''.join(char if char.isalpha() else quote_plus(char) for char in query)
-        url = 'https://www.google.com/search?q=' + query
-        await ctx.send(url)
+        await google.run_command(ctx, query)
 
     @commands.command(aliases=['meth'])
     async def math(self, ctx, *, line):
@@ -35,7 +30,7 @@ class Misc(commands.Cog):
     @commands.guild_only()
     async def whos(self, ctx, *, member:Optional[conv.FuzzyMember]=None):
         member = member or ctx.author
-        
+
         response = f'It\'s **{member}**'
         embed = colors.embed()
         embed.description = member.mention
@@ -47,14 +42,14 @@ class Misc(commands.Cog):
             .add_field(name='Joined on', value=joined_at)
 
         await ctx.send(response, embed=embed)
-    
+
     @commands.command()
     async def invite(self, ctx):
         worryluv = discord.utils.get(self.bot.emojis, name='worryluv')
         embed = colors.embed()
         embed.description = f'{worryluv} [Click here]({INVITE_LINK}) to invite {self.bot.user.name}!'
         await ctx.send(embed=embed)
-    
+
     @commands.command(aliases=['cv', 'ncov', 'corona', 'morning'])
     async def covid(self, ctx, *, region='server'):
         await ctx.trigger_typing()
@@ -76,7 +71,7 @@ class Misc(commands.Cog):
             embed.description = e.args[0]
         embed.color = empty.color
         await msg.edit(embed=embed)
-    
+
     @commands.group(name='reddit', aliases=['r', 'rd'], invoke_without_command=True)
     async def _reddit(self, ctx, sub='random', sorting:Optional[reddit.sorting]='top', \
         posts:Optional[reddit.posts]=1, *, top:reddit.period='today'):
@@ -92,7 +87,7 @@ class Misc(commands.Cog):
     async def top(self, ctx, sub:Optional[reddit.subname]='random', posts:reddit.posts='1'):
         await ctx.trigger_typing()
         await reddit.send_posts_in_embeds(ctx, sub, 'top', posts)
-    
+
     @commands.Cog.listener()
     async def on_message(self, msg):
         ctx = await self.bot.get_context(msg)
