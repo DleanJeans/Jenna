@@ -20,9 +20,8 @@ async def run_command(ctx, query):
 
     for page in results:
         domain = urlparse(page.link).netloc
-        domain = f' ({domain})' if domain else ''
-        page_title_and_domain = f'**{page.title}**{domain}'
-        markdown_title = f'[{page_title_and_domain}]({page.link})' if page.link else page_title_and_domain
+        domain = f'({domain})' if domain else ''
+        markdown_title = f'**[{page.title}]({page.link})** {domain}' if page.link else f'**{page.title}**'
         embed.description = markdown_title
         if page.preview:
             embed.description += f'\n{page.preview}'

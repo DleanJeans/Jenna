@@ -20,7 +20,7 @@ class Duck:
     PAGE_LINK = 'https://en.wikipedia.org/wiki/Duck'
     PAGE_PREVIEW = 'Duck is the common name for numerous species of waterfowl in the family Anatidae. Ducks are generally smaller and shorter-necked than swans and geese, ...'
     PAGE_EXTRA_LINKS = '[‎Domestic duck](https://en.wikipedia.org/wiki/Domestic_duck) · [‎Muscovy duck](https://en.wikipedia.org/wiki/Muscovy_duck) · [‎Mandarin duck](https://en.wikipedia.org/wiki/Mandarin_duck) · [‎Rubber duck](https://en.wikipedia.org/wiki/Rubber_duck)'
-    PAGE_DESCRIPTION = f'[**{PAGE_TITLE}** (en.wikipedia.org)]({PAGE_LINK})\n{PAGE_PREVIEW}'
+    PAGE_DESCRIPTION = f'**[{PAGE_TITLE}]({PAGE_LINK})** (en.wikipedia.org)\n{PAGE_PREVIEW}'
 
 
 def patch_google(result):
