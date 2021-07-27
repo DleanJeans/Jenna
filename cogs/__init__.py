@@ -18,7 +18,7 @@ NAMES = [
     's',
     'nhoan',
     'games',
-
+    'slash',
     'alpha',
 ]
 

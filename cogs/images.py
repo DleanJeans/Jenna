@@ -4,6 +4,7 @@ from .common import utils
 from discord.ext import commands
 from datetime import datetime
 
+from .commands import avatar
 
 INSPIROBOT_URL = 'http://inspirobot.me'
 INSPIROBOT_API = INSPIROBOT_URL + '/api?generate=true'
@@ -20,13 +21,9 @@ class Images(commands.Cog):
             ref_message = utils.get_referenced_message(ctx.message)
             if ref_message:
                 member = ref_message.author
-        member = member or ctx.author
-        embed = colors.embed(description=member.mention)
-        embed.title = str(member)
-        embed.set_image(url=str(member.avatar_url).replace('webp', 'png'))
-        embed.timestamp = datetime.now().astimezone()
-        await ctx.send(embed=embed)
-    
+        
+        await avatar.run(ctx, member)
+
     @commands.command(aliases=['quote'])
     async def inspiro(self, ctx):
         await ctx.trigger_typing()

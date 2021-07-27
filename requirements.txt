@@ -20,3 +20,5 @@ upsidedown==0.4
 unidecode==1.2.0
 
 jishaku==2.0.0
+
+discord-py-slash-command==2.3.2
