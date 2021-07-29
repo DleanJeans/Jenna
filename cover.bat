@@ -8,6 +8,11 @@ if "%1"=="slow" (
     set marker=-m "%slow_tests%"
 ))
 
+if [%marker%] == [] (
+    set args=%*
+    goto run_test
+)
+
 set args=
 
 :remove_first_arg
@@ -15,6 +20,7 @@ shift
 if "%1"=="" goto run_test
 set args=%args% %1
 goto remove_first_arg
+
 
 :run_test
 py -m pytest ^
