@@ -8,7 +8,7 @@ import requests_async
 @pytest.mark.enable_socket
 async def test_auto_detect():
     result = await translate('lac')
-    assert result.text == 'lake'
+    assert result.text.lower() == 'lake'
 
 
 @pytest.mark.asyncio

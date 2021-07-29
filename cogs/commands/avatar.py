@@ -1,21 +1,29 @@
 import discord
-from discord_slash.context import SlashContext
-from discord_slash.model import SlashCommandOptionType
-from discord_slash.utils.manage_commands import create_option
 from cogs.common import colors
 from datetime import datetime
 
 
-async def avatar(ctx: SlashContext, user: discord.User = None):
+async def avatar(ctx, user: discord.User = None):
+    embed = run_embed(ctx, user)
+    await ctx.send(embed=embed)
+
+
+def run_embed(ctx, user):
     member = user or ctx.author
     embed = colors.embed(description=member.mention)
     embed.title = str(member)
     embed.set_image(url=str(member.avatar_url).replace('webp', 'png'))
     embed.timestamp = datetime.now().astimezone()
-    await ctx.send(embed=embed)
+    return embed
 
 
-run = avatar
+async def send_with_announcement(ctx, user):
+    embed = run_embed(ctx, user)
+    ANNOUNCEMENT = '`/avatar` slash command is available!'
+    await ctx.send(ANNOUNCEMENT, embed=embed)
+
+
+send = avatar
 props = {
     'description':
     "Zoom in on someone's avatar before they yeet it or show everyone how awesome your avatar is!"

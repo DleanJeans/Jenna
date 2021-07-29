@@ -2,7 +2,6 @@ import env
 
 from discord import Activity, ActivityType
 from discord.ext import commands
-from discord_slash import SlashCommand
 
 LOGGED_IN = 'Logged in as'
 TESTING_MSG = 'Ready for testing!'
@@ -14,17 +13,12 @@ TESTING_CHANNEL_ID = 664112170765910031
 
 class Jenna(commands.Bot):
     async def on_ready(self):
-        self.setup_slash_commands()
         await self.set_activity_to_help_command()
         await self.notify_owner()
         self.add_sk_alias_for_jishaku()
 
-    def setup_slash_commands(self):
-        self.slash = SlashCommand(self, sync_commands=True, sync_on_cog_reload=True)
-
     async def set_activity_to_help_command(self):
-        await self.change_presence(
-            activity=Activity(type=ActivityType.watching, name=HELP_COMMAND))
+        await self.change_presence(activity=Activity(type=ActivityType.watching, name=HELP_COMMAND))
 
     async def notify_owner(self):
         await self.fetch_owner()

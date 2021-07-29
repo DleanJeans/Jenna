@@ -28,6 +28,7 @@ async def test_preview(google_duck):
     print(google_duck.preview)
 
 
+@pytest.mark.skip(reason='Unreliable results')
 @pytest.mark.asyncio
 @pytest.mark.enable_socket
 async def test_extra_links(google_duck):
@@ -69,3 +70,5 @@ async def test_convert_temperature():
 @pytest.mark.enable_socket
 async def test_ring_no_error():
     result = await google_first_result('ring')
+
+#1kwh bao nhiêu tiền

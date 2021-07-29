@@ -5,7 +5,7 @@ import pytest
 
 from bot import create_bot
 from difflib import SequenceMatcher
-from discord.ext.test import configure, get_config, get_message, message, empty_queue
+from discord.ext.test import backend, configure, get_config, get_message, message, empty_queue
 
 
 @pytest.fixture(scope='session')
@@ -14,6 +14,12 @@ def event_loop():
     yield loop
     loop.close()
 
+@pytest.fixture
+def make_member(guild):
+    def make(username, discrim, avatar=None, id=-1, _guild=None):
+        user = backend.make_user(username, discrim, avatar, id)
+        return backend.make_member(user, _guild or guild)
+    return make
 
 @pytest.fixture
 def similarity():
@@ -72,6 +78,11 @@ def channel(config):
 @pytest.fixture()
 def members(config):
     return config.members
+
+
+@pytest.fixture()
+def me(members):
+    return members[0]
 
 
 async def send_cmd(*args):
