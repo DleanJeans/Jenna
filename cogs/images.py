@@ -3,7 +3,7 @@ from .common import converter as conv
 from .common import utils
 from discord.ext import commands
 
-from .commands import avatar
+from commands import avatar
 
 INSPIROBOT_URL = 'http://inspirobot.me'
 INSPIROBOT_API = INSPIROBOT_URL + '/api?generate=true'

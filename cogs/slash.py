@@ -4,7 +4,7 @@ from discord.ext import commands
 from discord_slash import SlashCommand
 from discord_slash.client import SlashCommand
 
-from cogs.commands import avatar
+from commands import avatar
 
 
 class Slash(commands.Cog):
