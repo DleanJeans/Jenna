@@ -1,8 +1,7 @@
-from discord.ext.test import backend
 from discord.ext.test.runner import get_embed, get_message
 import pytest
 
-from conftest import send_cmd, verify_message
+from conftest import send_cmd
 
 
 @pytest.fixture(scope='module')
@@ -43,6 +42,16 @@ def fuzzy(make_member):
 @pytest.mark.asyncio
 async def test_send_slash_info_if_used_fuzzy_string(fuzzy):
     await send_cmd('ava fuz')
-    msg = get_message()
-    assert msg.embeds
-    assert msg.content == '`/avatar` slash command is available!'
+    assert get_message().content == '`/avatar` slash command is available!'
+
+
+@pytest.mark.asyncio
+async def test_no_slash_info_with_mention(fuzzy):
+    await send_cmd('ava ' + fuzzy.mention)
+    assert not get_message().content
+
+
+@pytest.mark.asyncio
+async def test_no_slash_info_with_self(fuzzy):
+    await send_cmd('ava')
+    assert not get_message().content

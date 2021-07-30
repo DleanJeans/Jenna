@@ -1,3 +1,6 @@
+from typing import Union
+
+from discord.member import Member
 from .common import colors
 from .common import converter as conv
 from .common import utils
@@ -18,16 +21,13 @@ class Images(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=['ava', 'pfp'])
-    async def avatar(self, ctx, *, member=None):
+    async def avatar(self, ctx, *, member: Union[Member, str] = None):
         using_fuzzy_string = type(member) is str
         if using_fuzzy_string:
             member = await conv.FuzzyMember().convert(ctx, member)
-        elif not member:
-            ref_message = utils.get_referenced_message(ctx.message)
-            if ref_message:
-                member = ref_message.author
 
-        await avatar.send_with_announcement(ctx, member)
+        send = avatar.send_with_announcement if using_fuzzy_string else avatar.send
+        await send(ctx, member)
 
     @commands.command(aliases=['quote'])
     async def inspiro(self, ctx):
