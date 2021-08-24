@@ -12,7 +12,7 @@ def run_embed(ctx, user):
     member = user or ctx.author
     embed = colors.embed(description=member.mention)
     embed.title = str(member)
-    embed.set_image(url=str(member.avatar_url).replace('webp', 'png'))
+    embed.set_image(url=str(member.avatar_url))
     embed.timestamp = datetime.now().astimezone()
     return embed
 
