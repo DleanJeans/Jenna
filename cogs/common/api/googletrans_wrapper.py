@@ -1,5 +1,4 @@
 from googletrans.client import Translator
-import asyncio
 from aioify import aioify
 
 AsyncTranslator = aioify(Translator)
